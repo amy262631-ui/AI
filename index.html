@@ -16,15 +16,15 @@
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .loading-overlay { background: rgba(255,255,255,0.8); display: none; }
         
-        /* 戰力榜表格字體極大化 (維持原樣) */
+        /* 戰力榜表格字體維持極大化 (針對展示需求) */
         .summary-table th { font-size: 1.2rem; letter-spacing: 0.1em; padding: 1.5rem 1rem; }
         .summary-table td { font-size: 1.8rem; vertical-align: middle; padding: 2rem 1rem; }
         .achievement-score { font-size: 3rem; line-height: 1; }
 
-        /* 看板樣式優化 (縮小字體) */
-        .kanban-title { font-size: 2.25rem; font-weight: 900; } /* 36px */
-        .kanban-subtext { font-size: 1.25rem; }
-        .kanban-score { font-size: 1.75rem; }
+        /* 看板樣式優化 (適度縮小以節省空間) */
+        .kanban-title { font-size: 1.875rem; font-weight: 900; } /* 30px */
+        .kanban-subtext { font-size: 1.1rem; }
+        .kanban-score { font-size: 1.5rem; }
     </style>
 </head>
 <body class="min-h-screen py-10 px-4">
@@ -105,7 +105,7 @@
                 </div>
             </div>
 
-            <!-- Main Display -->
+            <!-- Main Display Area -->
             <div class="lg:col-span-3 space-y-16">
                 <!-- Kanban Section -->
                 <div>
@@ -117,7 +117,7 @@
                             Missions: <span id="projectCount" class="text-indigo-600">0</span>
                         </div>
                     </div>
-                    <div id="projectList" class="space-y-8">
+                    <div id="projectList" class="space-y-6">
                         <div id="statusMessage" class="text-center py-20 text-slate-400 italic text-2xl bg-white/50 rounded-[3rem] border-2 border-dashed">
                             正在載入雲端日誌...
                         </div>
@@ -239,15 +239,14 @@
         async function cloudAction(params) {
             showLoading(true);
             try {
-                // 使用 no-cors 模式確保 POST 能穿透 (GAS 常規做法)
                 await fetch(GAS_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     body: JSON.stringify(params)
                 });
                 showToast("同步傳送中...");
-                // 給伺服器一點處理時間，然後刷新
-                setTimeout(fetchData, 2000); 
+                // 給伺服器多一點時間處理
+                setTimeout(fetchData, 3000); 
             } catch (e) {
                 console.error(e);
                 showToast("存檔失敗");
@@ -280,52 +279,52 @@
                     sc.avg = ((sc.logic + sc.utility + sc.innovation) / (vCount * 3)).toFixed(1);
                 } else { sc.avg = '—'; }
 
-                // 強化判斷：只要包含「達成」或「完成」字眼就視為已完成
-                const sText = item.status || "";
+                // 模糊判斷狀態關鍵字
+                const sText = (item.status || "").toString();
                 const isCompleted = sText.includes('達成') || sText.includes('完成');
 
                 return `
-                <div class="adventure-card p-8 shadow-xl border-4 border-white transition-all hover:shadow-2xl hover:bg-white group">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div class="adventure-card p-6 shadow-xl border-4 border-white transition-all hover:shadow-2xl hover:bg-white group">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div class="flex-1 w-full">
-                            <div class="flex flex-wrap items-center gap-3 mb-4">
-                                <span class="px-4 py-1.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-black border-2 border-indigo-200 uppercase tracking-widest">Mission</span>
-                                <span class="text-base text-slate-500 font-bold bg-slate-50 px-4 py-1 rounded-full border border-slate-200">
+                            <div class="flex flex-wrap items-center gap-3 mb-2">
+                                <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-[10px] font-black border-2 border-indigo-200 uppercase tracking-widest">Mission</span>
+                                <span class="text-sm text-slate-500 font-bold bg-slate-50 px-3 py-1 rounded-full border border-slate-200">
                                     <i class="far fa-compass mr-2 text-indigo-500"></i>${formatDate(item.startDate)} ➔ <span class="text-orange-600 font-black">抵達: ${formatDate(item.deadline)}</span>
                                 </span>
                             </div>
-                            <h3 class="kanban-title text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors mb-4">${item.topic}</h3>
-                            <div class="flex flex-wrap items-center gap-8">
+                            <h3 class="kanban-title text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors mb-2">${item.topic}</h3>
+                            <div class="flex flex-wrap items-center gap-6">
                                 <span class="text-indigo-600 font-black kanban-subtext italic flex items-center">
-                                    <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center mr-3 text-lg border-2 border-white shadow-sm"><i class="fas fa-user-ninja"></i></div>
+                                    <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mr-2 text-base border-2 border-white shadow-sm"><i class="fas fa-user-ninja"></i></div>
                                     @${item.name}
                                 </span>
-                                <div class="flex items-center gap-6 bg-slate-50/80 px-6 py-2 rounded-[2rem] border-2 border-white shadow-inner">
-                                    <div class="flex items-center text-amber-500 kanban-score font-black"><i class="fas fa-bolt mr-3 text-yellow-500"></i>成就 ${sc.avg}</div>
+                                <div class="flex items-center gap-4 bg-slate-50/80 px-4 py-1 rounded-[1.5rem] border-2 border-white shadow-inner">
+                                    <div class="flex items-center text-amber-500 kanban-score font-black"><i class="fas fa-bolt mr-2 text-yellow-500 text-xl"></i>成就 ${sc.avg}</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex flex-wrap items-center gap-4 w-full md:w-auto justify-end">
-                            <span class="px-8 py-4 rounded-3xl text-lg font-black tracking-widest border-b-4 shadow-lg transition-all ${getStatusClass(item.status)}">${item.status || '🚀 正在起飛'}</span>
-                            <div class="flex gap-4">
+                        <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
+                            <span class="px-6 py-3 rounded-2xl text-base font-black tracking-widest border-b-4 shadow-md transition-all ${getStatusClass(item.status)}">${item.status || '🚀 正在起飛'}</span>
+                            <div class="flex gap-3">
                                 <!-- 切換按鈕 -->
-                                <button onclick="toggleStatus('${item.id}')" title="切換狀態" class="p-6 bg-white text-slate-400 hover:text-indigo-600 rounded-[2rem] transition shadow-md border-2 border-slate-100 active:scale-90"><i class="fas fa-sync-alt text-3xl"></i></button>
+                                <button onclick="toggleStatus('${item.id}')" title="切換狀態" class="p-4 bg-white text-slate-400 hover:text-indigo-600 rounded-[1.5rem] transition shadow-md border-2 border-slate-100 active:scale-90"><i class="fas fa-sync-alt text-xl"></i></button>
                                 
-                                <!-- 奧援按鈕：僅在達成目標時顯示 -->
-                                ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-indigo-600 text-white px-10 py-5 rounded-[2rem] font-black text-xl tracking-[0.2em] shadow-xl hover:bg-indigo-700 active:scale-95 pulse-soft">奧援</button>` : ''}
+                                <!-- 奧援按鈕 -->
+                                ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-indigo-600 text-white px-6 py-3 rounded-[1.5rem] font-black text-base tracking-[0.1em] shadow-xl hover:bg-indigo-700 active:scale-95 pulse-soft">奧援</button>` : ''}
                                 
-                                <button onclick="deleteProject('${item.id}')" class="p-6 text-slate-100 hover:text-red-500 transition"><i class="far fa-trash-alt text-3xl"></i></button>
+                                <button onclick="deleteProject('${item.id}')" class="p-4 text-slate-100 hover:text-red-500 transition"><i class="far fa-trash-alt text-xl"></i></button>
                             </div>
                         </div>
                     </div>
                     
                     <!-- 管理員專用明細 -->
-                    <div class="${isAdminView ? 'block' : 'hidden'} mt-10 pt-8 border-t-4 border-dashed border-slate-100 animate-in fade-in">
-                        <p class="w-full text-lg font-black text-slate-400 uppercase tracking-[0.3em] mb-4">奧援戰歷 (管理員視角)</p>
-                        <div class="flex flex-wrap gap-4">
-                            ${voters.length > 0 ? voters.map(v => `<div class="bg-white px-6 py-3 rounded-2xl border-2 border-slate-100 shadow-sm text-lg font-black">
-                                <span class="text-indigo-600 text-xl mr-2">${v}</span>: L:${item.votes[v].logic} U:${item.votes[v].utility} I:${item.votes[v].innovation}
-                            </div>`).join('') : '<p class="text-slate-400 italic text-xl">尚無奧援紀錄</p>'}
+                    <div class="${isAdminView ? 'block' : 'hidden'} mt-6 pt-6 border-t-4 border-dashed border-slate-100 animate-in fade-in">
+                        <p class="w-full text-sm font-black text-slate-400 uppercase tracking-[0.3em] mb-4">奧援戰歷 (管理員)</p>
+                        <div class="flex flex-wrap gap-3">
+                            ${vCount > 0 ? voters.map(v => `<div class="bg-white px-4 py-2 rounded-xl border-2 border-slate-100 shadow-sm text-sm font-black">
+                                <span class="text-indigo-600 text-base mr-2">${v}</span>: L:${item.votes[v].logic} U:${item.votes[v].utility} I:${item.votes[v].innovation}
+                            </div>`).join('') : '<p class="text-slate-400 italic text-sm">尚無紀錄</p>'}
                         </div>
                     </div>
                 </div>`;
@@ -383,7 +382,7 @@
         document.getElementById('aiForm').onsubmit = async (e) => {
             e.preventDefault();
             const newProject = {
-                action: 'create', id: Date.now().toString(), // 轉字串確保比對一致
+                action: 'create', id: Date.now().toString(),
                 name: document.getElementById('name').value.trim(),
                 topic: document.getElementById('topic').value.trim(),
                 startDate: document.getElementById('startDate').value,
@@ -395,7 +394,6 @@
         };
 
         async function toggleStatus(id) {
-            // 關鍵修正：確保 ID 都是字串比對
             const item = globalData.find(p => p.id.toString() === id.toString());
             if (!item) {
                 showToast("找不到對應專案");
@@ -406,39 +404,45 @@
             let currentIdx = 0;
             const curText = (item.status || "").toString();
             
-            // 模糊比對解決 Emoji 比對失效
             if (curText.includes('調校')) currentIdx = 1;
             else if (curText.includes('達成') || curText.includes('完成')) currentIdx = 2;
             
             const nStatus = states[(currentIdx + 1) % 3];
             
-            // 傳送更新請求
+            // 樂觀更新 (Optimistic UI)
+            item.status = nStatus;
+            updateUI(); 
+
             await cloudAction({ action: 'updateStatus', id: id.toString(), status: nStatus });
         }
 
         async function submitMultiVote() {
             const voter = document.getElementById('voterName').value.trim();
-            if (!voter || Object.values(selectedScores).some(v => v === 0)) return showToast("每個維度都要打分喔！");
+            if (!voter || Object.values(selectedScores).some(v => v === 0)) return showToast("維度未填滿！");
             
             const item = globalData.find(p => p.id.toString() === currentRatingProjectId.toString());
-            if (item.name === voter) return showToast("不能給自己發送奧援喔！");
+            if (item.name === voter) return showToast("不能奧援自己！");
             
             const nVotes = { ...(item.votes || {}) };
             nVotes[voter] = { ...selectedScores, time: new Date().toLocaleString() };
             
+            // 樂觀更新
+            item.votes = nVotes;
+            updateUI();
+
             await cloudAction({ action: 'updateVote', id: currentRatingProjectId.toString(), votes: nVotes });
             closeRatingModal();
         }
 
         async function deleteProject(id) {
-            if (confirm("這會從雲端永久刪除，確定嗎？")) {
+            if (confirm("確定從雲端刪除嗎？")) {
                 await cloudAction({ action: 'delete', id: id.toString() });
             }
         }
 
         function toggleAdminView() {
             if (!isAdminView) {
-                const input = prompt("🔐 請輸入守門人密碼 (預設 8888):");
+                const input = prompt("🔐 請輸入管理密碼 (預設 8888):");
                 if (input !== ADMIN_PWD) {
                     showToast("❌ 密碼錯誤");
                     return;
@@ -446,9 +450,9 @@
             }
             isAdminView = !isAdminView;
             const btn = document.getElementById('adminBtn');
-            btn.innerHTML = isAdminView ? `<i class="fas fa-lock-open mr-2 text-indigo-600"></i> 管理模式: 開啟` : `<i class="fas fa-shield-alt mr-2"></i> 管理員視角`;
+            btn.innerHTML = isAdminView ? `<i class="fas fa-lock-open mr-2 text-indigo-600"></i> 管理模式: 開啟` : `<i class="fas fa-shield-alt mr-2"></i> 管理員模式`;
             updateUI(); 
-            showToast(isAdminView ? "🔓 管理視野已打開" : "🔒 管理視野已關閉");
+            showToast(isAdminView ? "🔓 管理視野已開啟" : "🔒 管理視野已關閉");
         }
 
         // --- UI Utils ---
