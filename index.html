@@ -1,53 +1,488 @@
-function doGet() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const data = sheet.getDataRange().getValues();
-  if (data.length < 2) return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
-  const headers = data.shift();
-  const json = data.map(row => {
-    let obj = {};
-    headers.forEach((header, i) => {
-      let head = header.toString().trim().toLowerCase();
-      if (head === 'votes' && row[i]) {
-        try { obj['votes'] = JSON.parse(row[i]); } catch(e) { obj['votes'] = {}; }
-      } else {
-        obj[head] = row[i];
-      }
-    });
-    return obj;
-  });
-  return ContentService.createTextOutput(JSON.stringify(json)).setMimeType(ContentService.MimeType.JSON);
-}
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 創新探險日誌 - 雲端連線版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
+        .adventure-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); border-radius: 2rem; }
+        .star-rating-active { color: #fbbf24; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .pulse-soft { animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .loading-overlay { background: rgba(255,255,255,0.8); display: none; }
+        
+        /* 榜單表格字體極大化 */
+        .summary-table th { font-size: 1.25rem; padding: 1.5rem 1rem; }
+        .summary-table td { font-size: 1.8rem; vertical-align: middle; padding: 2rem 1rem; }
+        .achievement-score { font-size: 3.5rem; line-height: 1; }
 
-function doPost(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const params = JSON.parse(e.postData.contents);
-  const action = params.action;
-  const data = sheet.getDataRange().getValues();
-  const headers = data[0].map(h => h.toString().trim().toLowerCase());
+        /* 看板字體微調（適中尺寸） */
+        .kanban-title { font-size: 1.875rem; font-weight: 900; } 
+        .kanban-subtext { font-size: 1.1rem; }
+        .kanban-user-text { font-size: 1.25rem; }
+    </style>
+</head>
+<body class="min-h-screen py-10 px-4">
 
-  if (action === 'create') {
-    sheet.appendRow([params.id, params.name, params.topic, params.startDate, params.deadline, params.status, JSON.stringify({})]);
-  } else if (action === 'updateStatus' || action === 'updateVote') {
-    const targetId = params.id.toString();
-    const colName = action === 'updateStatus' ? 'status' : 'votes';
-    const colIndex = headers.indexOf(colName);
-    const newValue = action === 'updateStatus' ? params.status : JSON.stringify(params.votes);
-    if (colIndex > -1) {
-      for (let i = 1; i < data.length; i++) {
-        if (data[i][0].toString() === targetId) {
-          sheet.getRange(i + 1, colIndex + 1).setValue(newValue);
-          break;
+    <!-- 同步 Loading 遮罩 -->
+    <div id="loading" class="fixed inset-0 z-[100] flex items-center justify-center loading-overlay backdrop-blur-sm">
+        <div class="text-center">
+            <i class="fas fa-rocket text-7xl text-indigo-600 mb-4 animate-bounce"></i>
+            <p class="text-indigo-600 font-black text-3xl tracking-widest">穿越雲端同步中...</p>
+        </div>
+    </div>
+
+    <div class="max-w-7xl mx-auto">
+        <!-- 頂部標題區 -->
+        <header class="text-center mb-16">
+            <div class="inline-block px-8 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-sm font-black mb-6 tracking-[0.3em] shadow-lg pulse-soft uppercase">
+                AI Discovery Adventure 🌟
+            </div>
+            <h1 class="text-6xl font-black text-slate-800 mb-4 tracking-tight">🚀 AI 創新探險日誌</h1>
+            <p class="text-slate-600 text-2xl font-medium max-w-3xl mx-auto leading-relaxed">
+                這裡是我們的「創意孵化器」！讓我們一起玩轉 AI，優化流程。
+                <span class="block text-indigo-600 mt-4 font-black text-3xl">✨ 讓工作更輕鬆，成就感滿滿，讓未來超乎想像！ ✨</span>
+            </p>
+        </header>
+
+        <!-- 獎勵與激勵文字 -->
+        <div class="bg-indigo-600 rounded-[3rem] p-12 mb-16 shadow-2xl relative overflow-hidden text-white border-4 border-white/20">
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                <div class="text-center md:text-left">
+                    <h3 class="text-3xl font-black mb-4 flex items-center justify-center md:justify-start">
+                        <i class="fas fa-gift mr-4 text-yellow-400"></i> 冒險者的成長補給
+                    </h3>
+                    <p class="opacity-95 font-bold text-xl leading-relaxed">所有的進步與創意，都是部門成長的動力。<br>我們將參考這些日誌，作為未來獎金發放與職位調升的重要里程碑！</p>
+                </div>
+                <div class="flex-shrink-0 bg-white/10 p-8 rounded-3xl border border-white/20 text-center">
+                    <p class="text-sm uppercase tracking-widest opacity-70 mb-1">Current Mission</p>
+                    <p class="text-3xl font-black italic text-yellow-300">Efficiency Boost!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
+            <!-- 側邊欄：登記表單 -->
+            <div class="lg:col-span-1">
+                <div class="adventure-card p-10 shadow-2xl border border-white/50 sticky top-10">
+                    <h2 class="text-2xl font-black mb-8 text-indigo-600 flex items-center">
+                        <i class="fas fa-magic mr-3"></i> 啟動點子
+                    </h2>
+                    <form id="aiForm" class="space-y-6">
+                        <div>
+                            <label class="block text-xs font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">冒險者姓名</label>
+                            <input type="text" id="name" required placeholder="您的稱號" class="w-full px-5 py-4 bg-white border-2 border-slate-100 focus:border-indigo-400 rounded-3xl outline-none transition font-bold shadow-inner text-lg">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">探險主題</label>
+                            <input type="text" id="topic" required placeholder="想優化的內容" class="w-full px-5 py-4 bg-white border-2 border-slate-100 focus:border-indigo-400 rounded-3xl outline-none transition font-bold shadow-inner text-lg">
+                        </div>
+                        <div class="grid grid-cols-1 gap-4">
+                            <div>
+                                <label class="block text-xs font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">起始日</label>
+                                <input type="date" id="startDate" required class="w-full px-5 py-3 bg-white border-2 border-slate-100 focus:border-indigo-400 rounded-2xl outline-none transition text-base font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">預計抵達日</label>
+                                <input type="date" id="deadline" required class="w-full px-5 py-3 bg-white border-2 border-slate-100 focus:border-indigo-400 rounded-2xl outline-none transition text-base font-bold">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-gradient-to-br from-indigo-600 to-purple-700 hover:from-indigo-500 hover:to-purple-600 text-white font-black py-5 rounded-2xl shadow-xl transition transform active:scale-95 mt-4 tracking-widest text-xl">
+                            登錄探險 🚀
+                        </button>
+                    </form>
+                    <div class="mt-10 pt-8 border-t border-slate-200">
+                        <button onclick="toggleAdminView()" id="adminBtn" class="w-full py-4 text-xs font-black text-slate-400 hover:text-indigo-600 tracking-[0.2em] transition border-2 border-dashed border-slate-200 rounded-2xl uppercase">
+                            <i class="fas fa-shield-alt mr-2"></i> 管理員視角
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主顯示區 -->
+            <div class="lg:col-span-3 space-y-20">
+                <!-- 看板區 -->
+                <div>
+                    <div class="flex justify-between items-end mb-10 px-4">
+                        <h2 class="text-4xl font-black text-slate-800 tracking-tight flex items-center">
+                            <i class="fas fa-map-marked-alt mr-5 text-indigo-500"></i> 探險進度看板
+                        </h2>
+                        <div class="text-base font-black text-slate-400 bg-white px-5 py-2 rounded-full shadow-md border border-slate-100 uppercase tracking-widest">
+                            Missions: <span id="projectCount" class="text-indigo-600">0</span>
+                        </div>
+                    </div>
+                    <div id="projectList" class="space-y-8">
+                        <div id="statusMessage" class="text-center py-20 text-slate-400 italic text-2xl bg-white/50 rounded-[3rem] border-2 border-dashed">
+                            正在載入雲端日誌...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 榜單區 -->
+                <div class="pt-10">
+                    <h2 class="text-4xl font-black text-slate-800 mb-8 flex items-center tracking-tight px-4">
+                        <i class="fas fa-medal mr-5 text-yellow-500"></i> 夥伴探險戰力榜
+                    </h2>
+                    <div class="adventure-card shadow-2xl border-4 border-white overflow-hidden">
+                        <div class="overflow-x-auto no-scrollbar">
+                            <table class="w-full text-left border-collapse summary-table">
+                                <thead class="bg-indigo-600 text-white uppercase font-black">
+                                    <tr>
+                                        <th class="px-10 py-10">英雄同仁</th>
+                                        <th class="px-6 py-10 text-center">專案數</th>
+                                        <th class="px-6 py-10 text-center text-nowrap">奧援次數</th>
+                                        <th class="px-6 py-10 text-center">平均邏輯</th>
+                                        <th class="px-6 py-10 text-center">平均實用</th>
+                                        <th class="px-6 py-10 text-center text-yellow-300">平均創新</th>
+                                        <th class="px-10 py-10 text-right">成就總分</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="summaryTableBody" class="font-bold text-slate-700"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p class="text-center text-slate-500 text-xl mt-12 font-bold italic">
+                        <i class="fas fa-info-circle mr-3"></i> 戰力榜數據根據奧援評價實時同步，讓我們一起突破自我！
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 奧援評分彈窗 -->
+    <div id="ratingModal" class="fixed inset-0 bg-slate-900/70 hidden flex items-center justify-center z-50 p-6 backdrop-blur-md">
+        <div class="bg-white rounded-[4rem] p-12 max-w-lg w-full shadow-2xl border-8 border-white overflow-y-auto max-h-[90vh]">
+            <div class="text-center w-full mb-10">
+                <div class="text-8xl mb-6">💖</div>
+                <h3 class="text-4xl font-black text-slate-800 mb-4">傳送奧援能量</h3>
+                <p id="ratingProjectName" class="text-indigo-600 font-black text-2xl"></p>
+            </div>
+            <div class="space-y-8">
+                <input type="text" id="voterName" placeholder="您的稱號" class="w-full bg-slate-50 border-4 border-slate-100 rounded-3xl px-8 py-5 outline-none focus:border-indigo-400 transition font-black text-2xl text-slate-700 shadow-inner text-center">
+                <div class="space-y-10 bg-indigo-50/50 p-10 rounded-[3rem] border-2 border-indigo-100">
+                    <div class="rating-row" data-category="logic">
+                        <label class="flex justify-between text-base font-black text-slate-500 uppercase tracking-widest mb-2">底層邏輯 <span class="score-display text-indigo-600 font-black text-4xl">0</span></label>
+                        <div class="flex justify-between text-6xl star-row">
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="1"></i>
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="2"></i>
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="3"></i>
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="4"></i>
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="5"></i>
+                        </div>
+                    </div>
+                    <div class="rating-row" data-category="utility">
+                        <label class="flex justify-between text-base font-black text-slate-500 uppercase tracking-widest mb-2">辦公實用性 <span class="score-display text-emerald-500 font-black text-4xl">0</span></label>
+                        <div class="flex justify-between text-6xl star-row">
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="1"></i>
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="2"></i>
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="3"></i>
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="4"></i>
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="5"></i>
+                        </div>
+                    </div>
+                    <div class="rating-row" data-category="innovation">
+                        <label class="flex justify-between text-base font-black text-slate-500 uppercase tracking-widest mb-2">技術創新性 <span class="score-display text-orange-500 font-black text-4xl">0</span></label>
+                        <div class="flex justify-between text-6xl star-row">
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="1"></i>
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="2"></i>
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="3"></i>
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="4"></i>
+                            <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-6 mt-12">
+                <button onclick="closeRatingModal()" class="flex-1 px-4 py-6 bg-slate-100 rounded-3xl font-black text-slate-400 text-3xl transition hover:bg-slate-200">稍後</button>
+                <button onclick="submitMultiVote()" class="flex-2 px-10 py-6 bg-indigo-600 text-white rounded-3xl font-black shadow-2xl text-3xl transition active:scale-95">送出奧援 ⚡</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 px-16 py-8 bg-slate-900 text-white rounded-[3rem] shadow-2xl opacity-0 transition-all duration-500 pointer-events-none z-[110] text-2xl font-black tracking-widest uppercase">Success!</div>
+
+    <script>
+        // 【核心設定】請確保此網址與您的 GAS URL 一致
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbwW-rvZr0lOzoJFfQc_t6ML_Ogx80gKEMZ_6C57iflWFiov5KeSQUwIwHtMlu2AlAd9/exec';
+        const ADMIN_PWD = '8888'; 
+
+        let currentRatingProjectId = null;
+        let selectedScores = { logic: 0, utility: 0, innovation: 0 };
+        let isAdminView = false;
+        let globalData = [];
+
+        window.onload = () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+            document.getElementById('deadline').value = new Date(Date.now() + 14*86400000).toISOString().split('T')[0];
+            fetchData();
+            setupStars();
+        };
+
+        async function fetchData() {
+            showLoading(true);
+            try {
+                const response = await fetch(`${GAS_URL}?t=${Date.now()}`, { cache: "no-store" });
+                if (!response.ok) throw new Error('API No Response');
+                globalData = await response.json();
+                updateUI();
+            } catch (e) {
+                console.error(e);
+                showToast("連線雲端失敗");
+            }
+            showLoading(false);
         }
-      }
-    }
-  } else if (action === 'delete') {
-    const targetId = params.id.toString();
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][0].toString() === targetId) {
-        sheet.deleteRow(i + 1);
-        break;
-      }
-    }
-  }
-  return ContentService.createTextOutput("Success").setMimeType(ContentService.MimeType.TEXT);
-}
+
+        async function cloudAction(params) {
+            showLoading(true);
+            try {
+                await fetch(GAS_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(params)
+                });
+                showToast("同步傳送中...");
+                // 給伺服器多一點處理時間
+                setTimeout(fetchData, 2500); 
+            } catch (e) {
+                console.error(e);
+                showToast("雲端存檔失敗");
+                showLoading(false);
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('projectCount').textContent = globalData.length;
+            renderProjects(globalData);
+            renderSummary(globalData);
+        }
+
+        function renderProjects(items) {
+            const list = document.getElementById('projectList');
+            if (items.length === 0) {
+                list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-2xl bg-white/50 rounded-[3rem] border-2 border-dashed">目前尚未有任何探險紀錄。</div>';
+                return;
+            }
+            list.innerHTML = [...items].reverse().map(item => {
+                const voters = Object.keys(item.votes || {});
+                const vCount = voters.length;
+                let sc = { logic: 0, utility: 0, innovation: 0, avg: 0 };
+                if (vCount > 0) {
+                    voters.forEach(n => { 
+                        sc.logic += Number(item.votes[n].logic || 0); 
+                        sc.utility += Number(item.votes[n].utility || 0);
+                        sc.innovation += Number(item.votes[n].innovation || 0);
+                    });
+                    sc.avg = ((sc.logic + sc.utility + sc.innovation) / (vCount * 3)).toFixed(1);
+                } else { sc.avg = '—'; }
+
+                // 判斷狀態是否為「圓滿達成目標」 (關鍵字包含「達成」或「完成」)
+                const sText = (item.status || "").toString();
+                const isCompleted = sText.includes('達成') || sText.includes('完成');
+
+                return `
+                <div class="adventure-card p-10 shadow-xl border-4 border-white transition-all hover:shadow-2xl hover:bg-white group">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
+                        <div class="flex-1 w-full">
+                            <div class="flex flex-wrap items-center gap-4 mb-4">
+                                <span class="px-5 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-black border-2 border-indigo-200 uppercase tracking-widest">Mission Log</span>
+                                <span class="text-lg text-slate-500 font-bold bg-slate-50 px-4 py-1 rounded-full border border-slate-200">
+                                    <i class="far fa-compass mr-2 text-indigo-500"></i>${formatDate(item.startdate)} ➔ <span class="text-orange-600 font-black">抵達: ${formatDate(item.deadline)}</span>
+                                </span>
+                            </div>
+                            <h3 class="kanban-title text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors mb-4">${item.topic}</h3>
+                            <div class="flex flex-wrap items-center gap-10">
+                                <span class="text-indigo-600 font-black kanban-user-text italic flex items-center">
+                                    <div class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center mr-3 text-2xl border-2 border-white"><i class="fas fa-user-ninja"></i></div>
+                                    @${item.name}
+                                </span>
+                                <div class="flex items-center gap-4 bg-slate-50/80 px-6 py-2 rounded-[2rem] border-2 border-white shadow-inner">
+                                    <div class="flex items-center text-amber-500 font-black text-2xl"><i class="fas fa-bolt mr-2 text-yellow-500 text-3xl"></i>成就 ${sc.avg}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-4 w-full md:w-auto justify-end">
+                            <span class="px-10 py-5 rounded-3xl text-xl font-black tracking-widest border-b-8 shadow-lg transition-all ${getStatusClass(item.status)}">${item.status || '🚀 正在起飛'}</span>
+                            <div class="flex gap-4">
+                                <button onclick="toggleStatus('${item.id}')" title="切換進度" class="p-6 bg-white text-slate-400 hover:text-indigo-600 rounded-[2rem] transition shadow-md border-2 border-slate-100 active:scale-90"><i class="fas fa-sync-alt text-3xl"></i></button>
+                                ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-indigo-600 text-white px-10 py-5 rounded-[2rem] font-black text-xl tracking-[0.1em] shadow-xl hover:bg-indigo-700 active:scale-95 pulse-soft">奧援</button>` : ''}
+                                <button onclick="deleteProject('${item.id}')" class="p-6 text-slate-100 hover:text-red-500 transition"><i class="far fa-trash-alt text-3xl"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 管理員專用：日誌明細 -->
+                    <div class="${isAdminView ? 'block' : 'hidden'} mt-10 pt-8 border-t-4 border-dashed border-slate-100 animate-in fade-in">
+                        <p class="w-full text-lg font-black text-slate-400 uppercase tracking-[0.3em] mb-4">奧援戰歷 (管理員模式)</p>
+                        <div class="flex flex-wrap gap-4">
+                            ${vCount > 0 ? voters.map(v => `<div class="bg-white px-6 py-3 rounded-2xl border-2 border-slate-100 shadow-sm text-lg font-black">
+                                <span class="text-indigo-600 text-xl mr-2">${v}</span>: L:${item.votes[v].logic} U:${item.votes[v].utility} I:${item.votes[v].innovation}
+                            </div>`).join('') : '<p class="text-slate-400 italic text-xl">目前尚無數據。</p>'}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderSummary(items) {
+            const stats = {};
+            items.forEach(item => {
+                const n = item.name || "Unknown";
+                if (!stats[n]) stats[n] = { total: 0, logic: 0, utility: 0, innovation: 0, vCount: 0 };
+                stats[n].total++;
+                const votes = Object.values(item.votes || {});
+                if (votes.length > 0) {
+                    votes.forEach(v => { 
+                        stats[n].logic += Number(v.logic || 0); 
+                        stats[n].utility += Number(v.utility || 0); 
+                        stats[n].innovation += Number(v.innovation || 0); 
+                        stats[n].vCount++; 
+                    });
+                }
+            });
+            const sorted = Object.keys(stats).sort((a,b) => {
+                const sB = (stats[b].logic + stats[b].utility + stats[b].innovation) / (Math.max(1, stats[b].vCount) * 3);
+                const sA = (stats[a].logic + stats[a].utility + stats[a].innovation) / (Math.max(1, stats[a].vCount) * 3);
+                return sB - sA;
+            });
+
+            document.getElementById('summaryTableBody').innerHTML = sorted.map((name, idx) => {
+                const s = stats[name];
+                const avgL = s.vCount > 0 ? (s.logic / s.vCount).toFixed(1) : '0.0';
+                const avgU = s.vCount > 0 ? (s.utility / s.vCount).toFixed(1) : '0.0';
+                const avgI = s.vCount > 0 ? (s.innovation / s.vCount).toFixed(1) : '0.0';
+                const totalAvg = ((parseFloat(avgL) + parseFloat(avgU) + parseFloat(avgI)) / 3).toFixed(1);
+                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '👤';
+                return `
+                <tr class="border-t-4 border-slate-100 hover:bg-indigo-50/50 transition group">
+                    <td class="px-10 py-12 font-black text-slate-800 text-3xl">
+                        <span class="mr-6 inline-block transform group-hover:rotate-12 transition-transform">${medal}</span>@${name}
+                    </td>
+                    <td class="px-6 py-12 text-center text-slate-400 text-4xl font-mono">${s.total}</td>
+                    <td class="px-6 py-12 text-center text-slate-400 font-black text-4xl font-mono">${s.vCount}</td>
+                    <td class="px-6 py-12 text-center font-bold text-slate-400 italic text-2xl">${avgL}</td>
+                    <td class="px-6 py-12 text-center font-bold text-slate-400 italic text-2xl">${avgU}</td>
+                    <td class="px-6 py-12 text-center font-bold text-orange-400 italic text-2xl">${avgI}</td>
+                    <td class="px-10 py-12 text-right">
+                        <span class="bg-indigo-600 text-white px-10 py-6 rounded-[2.5rem] font-black shadow-xl ring-[12px] ring-indigo-50 achievement-score font-mono">${totalAvg}</span>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // --- Core Functions ---
+        document.getElementById('aiForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const newProject = {
+                action: 'create', id: Date.now().toString(),
+                name: document.getElementById('name').value.trim(),
+                topic: document.getElementById('topic').value.trim(),
+                startDate: document.getElementById('startDate').value,
+                deadline: document.getElementById('deadline').value,
+                status: '🚀 正在起飛'
+            };
+            await cloudAction(newProject);
+            e.target.reset();
+        };
+
+        async function toggleStatus(id) {
+            const targetId = id.toString();
+            const item = globalData.find(p => p.id.toString() === targetId);
+            if (!item) return;
+            
+            const states = ['🚀 正在起飛', '🔍 實驗室調校中', '✨ 圓滿達成目標'];
+            let curIdx = 0;
+            const curText = (item.status || "").toString();
+            
+            // 模糊判斷解決字串編碼/Emoji 比對問題
+            if (curText.includes('調校')) curIdx = 1;
+            else if (curText.includes('達成') || curText.includes('完成')) curIdx = 2;
+            
+            const nStatus = states[(curIdx + 1) % 3];
+            
+            // 樂觀 UI：直接更新畫面並進入同步
+            item.status = nStatus;
+            updateUI(); 
+
+            await cloudAction({ action: 'updateStatus', id: targetId, status: nStatus });
+        }
+
+        async function submitMultiVote() {
+            const voter = document.getElementById('voterName').value.trim();
+            if (!voter || Object.values(selectedScores).some(v => v === 0)) return showToast("每個評價都要打分喔！");
+            
+            const item = globalData.find(p => p.id.toString() === currentRatingProjectId.toString());
+            if (item.name === voter) return showToast("不能奧援自己啦！");
+            
+            const nVotes = { ...(item.votes || {}) };
+            nVotes[voter] = { ...selectedScores, time: new Date().toLocaleString() };
+            item.votes = nVotes;
+            updateUI();
+            await cloudAction({ action: 'updateVote', id: currentRatingProjectId.toString(), votes: nVotes });
+            closeRatingModal();
+        }
+
+        async function deleteProject(id) {
+            if (confirm("這會從雲端永久刪除嗎？")) {
+                await cloudAction({ action: 'delete', id: id.toString() });
+            }
+        }
+
+        function toggleAdminView() {
+            if (!isAdminView) {
+                const input = prompt("🔐 請輸入守門人密碼 (預設 8888):");
+                if (input !== ADMIN_PWD) {
+                    showToast("❌ 密碼錯誤");
+                    return;
+                }
+            }
+            isAdminView = !isAdminView;
+            const btn = document.getElementById('adminBtn');
+            btn.innerHTML = isAdminView ? `<i class="fas fa-lock-open mr-2 text-indigo-600"></i> 管理模式: 已開啟` : `<i class="fas fa-shield-alt mr-2"></i> 管理員儀表板`;
+            updateUI(); 
+            showToast(isAdminView ? "🔓 進入管理視野" : "🔒 返回夥伴視角");
+        }
+
+        // --- UI Utils ---
+        function showLoading(s) { document.getElementById('loading').style.display = s ? 'flex' : 'none'; }
+        function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 3000); }
+        function getStatusClass(s) { 
+            const t = (s || "").toString();
+            if (t.includes('達成') || t.includes('完成')) return 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-100';
+            if (t.includes('調校')) return 'bg-amber-400 text-white border-amber-500 shadow-amber-100';
+            return 'bg-indigo-600 text-white border-indigo-700 shadow-indigo-100';
+        }
+        function formatDate(d) { if (!d) return ''; const date = new Date(d); if (isNaN(date.getTime())) return d; return `${date.getMonth()+1}/${date.getDate()}`; }
+        function openRatingModal(id, title) {
+            currentRatingProjectId = id; selectedScores = { logic: 0, utility: 0, innovation: 0 };
+            document.getElementById('ratingProjectName').textContent = title;
+            document.querySelectorAll('.score-display').forEach(d => d.textContent = '0');
+            document.querySelectorAll('.star-row i').forEach(s => { s.classList.replace('fas','far'); s.classList.remove('star-rating-active'); });
+            document.getElementById('ratingModal').classList.remove('hidden');
+        }
+        function closeRatingModal() { document.getElementById('ratingModal').classList.add('hidden'); }
+        function setupStars() {
+            document.querySelectorAll('.rating-row').forEach(row => {
+                const cat = row.dataset.category;
+                const stars = row.querySelectorAll('.star-row i');
+                stars.forEach(s => {
+                    s.onmouseover = () => highlightStars(row, s.dataset.val);
+                    s.onclick = () => { selectedScores[cat] = parseInt(s.dataset.val); row.querySelector('.score-display').textContent = selectedScores[cat]; highlightStars(row, selectedScores[cat]); };
+                });
+                row.onmouseleave = () => highlightStars(row, selectedScores[cat]);
+            });
+        }
+        function highlightStars(row, val) {
+            row.querySelectorAll('.star-row i').forEach(s => {
+                if (s.dataset.val <= val) { s.classList.replace('far', 'fas'); s.classList.add('star-rating-active'); }
+                else { s.classList.replace('fas', 'far'); s.classList.remove('star-rating-active'); }
+            });
+        }
+    </script>
+</body>
+</html>
