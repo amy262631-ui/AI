@@ -95,7 +95,7 @@
                     </form>
                     <div class="mt-10 pt-8 border-t border-slate-200">
                         <button onclick="toggleAdminView()" id="adminBtn" class="w-full py-4 text-sm font-black text-slate-400 hover:text-indigo-600 tracking-[0.2em] transition border-2 border-dashed border-slate-200 rounded-2xl uppercase">
-                            <i class="fas fa-shield-alt mr-2"></i> 管理模式: 關閉
+                            <i class="fas fa-lock mr-2"></i> 管理員儀表板
                         </button>
                     </div>
                 </div>
@@ -120,7 +120,7 @@
                     </div>
                 </div>
 
-                <!-- Leaderboard Section -->
+                <!-- Leaderboard Section (榜單) -->
                 <div class="pt-10">
                     <h2 class="text-5xl font-black text-slate-800 mb-10 flex items-center tracking-tight px-4">
                         <i class="fas fa-medal mr-6 text-yellow-500"></i> 夥伴探險戰力榜
@@ -139,7 +139,9 @@
                                         <th class="px-10 py-10 text-right">成就總分</th>
                                     </tr>
                                 </thead>
-                                <tbody id="summaryTableBody" class="font-bold text-slate-700"></tbody>
+                                <tbody id="summaryTableBody" class="font-bold text-slate-700">
+                                    <!-- 資料將由 JS 填入 -->
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -153,7 +155,7 @@
 
     <!-- Rating Modal -->
     <div id="ratingModal" class="fixed inset-0 bg-slate-900/70 hidden flex items-center justify-center z-50 p-6 backdrop-blur-md">
-        <div class="bg-white rounded-[4rem] p-12 max-w-lg w-full shadow-2xl border-8 border-white">
+        <div class="bg-white rounded-[4rem] p-12 max-w-lg w-full shadow-2xl border-8 border-white overflow-y-auto max-h-[90vh]">
             <div class="text-center w-full mb-10">
                 <div class="text-8xl mb-6">💖</div>
                 <h3 class="text-4xl font-black text-slate-800 mb-4">傳送奧援能量</h3>
@@ -207,6 +209,7 @@
 
     <script>
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbwW-rvZr0lOzoJFfQc_t6ML_Ogx80gKEMZ_6C57iflWFiov5KeSQUwIwHtMlu2AlAd9/exec';
+        const ADMIN_PWD = '8888'; // 管理員進入密碼
 
         let currentRatingProjectId = null;
         let selectedScores = { logic: 0, utility: 0, innovation: 0 };
@@ -277,13 +280,12 @@
                     sc.avg = ((sc.logic + sc.utility + sc.innovation) / (vCount * 3)).toFixed(1);
                 } else { sc.avg = '—'; }
 
-                // 為了避開 Emoji 判斷問題，判斷是否包含特定關鍵字
-                const isCompleted = item.status && item.status.includes('達成');
+                const isCompleted = item.status && (item.status.includes('達成') || item.status.includes('完成'));
 
                 return `
                 <div class="adventure-card p-12 shadow-xl border-4 border-white transition-all hover:shadow-2xl hover:bg-white group">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
-                        <div class="flex-1">
+                        <div class="flex-1 w-full">
                             <div class="flex flex-wrap items-center gap-4 mb-6">
                                 <span class="px-5 py-2 bg-indigo-100 text-indigo-700 rounded-full text-base font-black border-2 border-indigo-200 uppercase tracking-widest">Mission Log</span>
                                 <span class="text-xl text-slate-500 font-bold bg-slate-50 px-6 py-2 rounded-full border border-slate-200">
@@ -301,21 +303,23 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-6 w-full md:w-auto">
+                        <div class="flex flex-wrap items-center gap-6 w-full md:w-auto justify-end">
                             <span class="px-10 py-5 rounded-3xl text-lg font-black tracking-widest border-b-8 transition-all ${getStatusClass(item.status)}">${item.status || '🚀 正在起飛'}</span>
                             <div class="flex gap-4">
-                                <button onclick="toggleStatus('${item.id}')" class="p-6 bg-white text-slate-400 hover:text-indigo-600 rounded-[2rem] transition shadow-md border-2 border-slate-100"><i class="fas fa-sync-alt text-3xl"></i></button>
+                                <button onclick="toggleStatus('${item.id}')" title="切換進度" class="p-6 bg-white text-slate-400 hover:text-indigo-600 rounded-[2rem] transition shadow-md border-2 border-slate-100 active:scale-90"><i class="fas fa-sync-alt text-3xl"></i></button>
                                 ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-indigo-600 text-white px-14 py-6 rounded-[2rem] font-black text-lg tracking-[0.4em] shadow-xl hover:bg-indigo-700 active:scale-95">奧援</button>` : ''}
                                 <button onclick="deleteProject('${item.id}')" class="p-6 text-slate-100 hover:text-red-500 transition"><i class="far fa-trash-alt text-3xl"></i></button>
                             </div>
                         </div>
                     </div>
-                    <!-- 管理模式日誌 -->
-                    <div class="${isAdminView ? 'block' : 'hidden'} mt-12 pt-12 border-t-4 border-dashed border-slate-100 flex flex-wrap gap-4">
+                    <!-- 管理員專用：評分明細 -->
+                    <div class="${isAdminView ? 'block' : 'hidden'} mt-12 pt-12 border-t-4 border-dashed border-slate-100 animate-in fade-in slide-in-from-top-2">
                         <p class="w-full text-sm font-black text-slate-400 uppercase tracking-[0.3em] mb-4">奧援戰歷 (僅管理員可見)</p>
-                        ${voters.length > 0 ? voters.map(v => `<div class="bg-white px-8 py-5 rounded-3xl border-2 border-slate-100 shadow-sm text-xl font-black">
-                            <span class="text-indigo-600 text-2xl mr-3">${v}</span>: L:${item.votes[v].logic} U:${item.votes[v].utility} I:${item.votes[v].innovation}
-                        </div>`).join('') : '<p class="text-slate-400 italic">尚無奧援紀錄</p>'}
+                        <div class="flex flex-wrap gap-4">
+                            ${voters.length > 0 ? voters.map(v => `<div class="bg-white px-8 py-5 rounded-3xl border-2 border-slate-100 shadow-sm text-xl font-black">
+                                <span class="text-indigo-600 text-2xl mr-3">${v}</span>: L:${item.votes[v].logic} U:${item.votes[v].utility} I:${item.votes[v].innovation}
+                            </div>`).join('') : '<p class="text-slate-400 italic">尚無奧援紀錄</p>'}
+                        </div>
                     </div>
                 </div>`;
             }).join('');
@@ -349,6 +353,7 @@
                 const avgI = s.vCount > 0 ? (s.innovation / s.vCount).toFixed(1) : '0.0';
                 const totalAvg = ((parseFloat(avgL) + parseFloat(avgU) + parseFloat(avgI)) / 3).toFixed(1);
                 const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '👤';
+
                 return `
                 <tr class="border-t-4 border-slate-100 hover:bg-indigo-50/50 transition group">
                     <td class="px-10 py-12 font-black text-slate-800 text-4xl">
@@ -366,6 +371,7 @@
             }).join('');
         }
 
+        // --- Core Functions ---
         document.getElementById('aiForm').onsubmit = async (e) => {
             e.preventDefault();
             const newProject = {
@@ -383,10 +389,21 @@
         async function toggleStatus(id) {
             const item = globalData.find(p => p.id.toString() === id.toString());
             if (!item) return;
+            
+            // 更穩健的狀態比對
             const states = ['🚀 正在起飛', '🔍 實驗室調校中', '✨ 圓滿達成目標'];
-            // 處理 item.status 為 undefined 或不匹配的情況
-            let currentIdx = states.indexOf(item.status);
-            if (currentIdx === -1) currentIdx = 0;
+            let currentIdx = -1;
+            
+            if (!item.status) {
+                currentIdx = 0;
+            } else {
+                // 檢查是否包含關鍵字，避開 Emoji 比對問題
+                if (item.status.includes('起飛')) currentIdx = 0;
+                else if (item.status.includes('調校')) currentIdx = 1;
+                else if (item.status.includes('達成') || item.status.includes('完成')) currentIdx = 2;
+                else currentIdx = 0;
+            }
+            
             const nStatus = states[(currentIdx + 1) % 3];
             await cloudAction({ action: 'updateStatus', id: id, status: nStatus });
         }
@@ -403,25 +420,35 @@
         }
 
         async function deleteProject(id) {
-            if (confirm("這會從雲端刪除，確定嗎？")) await cloudAction({ action: 'delete', id: id });
+            if (confirm("這會從雲端永久刪除，確定嗎？")) await cloudAction({ action: 'delete', id: id });
         }
 
         function toggleAdminView() {
+            if (!isAdminView) {
+                const input = prompt("請輸入管理密碼以展開視野:");
+                if (input !== ADMIN_PWD) {
+                    showToast("密碼錯誤，請詢問守門人");
+                    return;
+                }
+            }
             isAdminView = !isAdminView;
             const btn = document.getElementById('adminBtn');
-            btn.innerHTML = isAdminView ? `<i class="fas fa-lock-open mr-2"></i> 管理模式: 開啟` : `<i class="fas fa-shield-alt mr-2"></i> 管理模式: 關閉`;
+            btn.innerHTML = isAdminView ? `<i class="fas fa-lock-open mr-2"></i> 管理模式: 開啟` : `<i class="fas fa-shield-alt mr-2"></i> 管理員儀表板`;
             updateUI(); 
             showToast(isAdminView ? "管理視野已展開" : "回到勇者視野");
         }
 
         function showLoading(s) { document.getElementById('loading').style.display = s ? 'flex' : 'none'; }
         function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 3000); }
+        
         function getStatusClass(s) { 
-            if (s && s.includes('達成')) return 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-100';
+            if (s && (s.includes('達成') || s.includes('完成'))) return 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-100';
             if (s && s.includes('調校')) return 'bg-amber-400 text-white border-amber-500 shadow-amber-100';
             return 'bg-indigo-600 text-white border-indigo-700 shadow-indigo-100';
         }
+        
         function formatDate(d) { if (!d) return ''; const date = new Date(d); return isNaN(date.getTime()) ? d : `${date.getMonth()+1}/${date.getDate()}`; }
+        
         function openRatingModal(id, title) {
             currentRatingProjectId = id; selectedScores = { logic: 0, utility: 0, innovation: 0 };
             document.getElementById('ratingProjectName').textContent = title;
@@ -429,7 +456,9 @@
             document.querySelectorAll('.star-row i').forEach(s => { s.classList.replace('fas','far'); s.classList.remove('star-rating-active'); });
             document.getElementById('ratingModal').classList.remove('hidden');
         }
+        
         function closeRatingModal() { document.getElementById('ratingModal').classList.add('hidden'); }
+        
         function setupStars() {
             document.querySelectorAll('.rating-row').forEach(row => {
                 const cat = row.dataset.category;
@@ -441,6 +470,7 @@
                 row.onmouseleave = () => highlightStars(row, selectedScores[cat]);
             });
         }
+        
         function highlightStars(row, val) {
             row.querySelectorAll('.star-row i').forEach(s => {
                 if (s.dataset.val <= val) { s.classList.replace('far', 'fas'); s.classList.add('star-rating-active'); }
