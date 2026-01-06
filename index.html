@@ -17,9 +17,10 @@
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .loading-overlay { background: rgba(255,255,255,0.8); display: none; }
         
-        /* 針對榜單表格的字體加強 */
-        .summary-table th { font-size: 1.1rem; letter-spacing: 0.1em; }
-        .summary-table td { font-size: 1.5rem; vertical-align: middle; }
+        /* 針對榜單表格與看板的字體極大化設定 */
+        .summary-table th { font-size: 1.2rem; letter-spacing: 0.1em; padding: 1.5rem 1rem; }
+        .summary-table td { font-size: 1.8rem; vertical-align: middle; padding: 2rem 1rem; }
+        .big-score { font-size: 2.5rem; line-height: 1; }
     </style>
 </head>
 <body class="min-h-screen py-10 px-4">
@@ -28,9 +29,9 @@
     <div id="loading" class="fixed inset-0 z-[100] flex items-center justify-center loading-overlay backdrop-blur-sm">
         <div class="text-center">
             <div class="relative inline-block">
-                <i class="fas fa-rocket text-6xl text-indigo-600 mb-4 animate-bounce"></i>
+                <i class="fas fa-rocket text-7xl text-indigo-600 mb-4 animate-bounce"></i>
             </div>
-            <p class="text-indigo-600 font-black text-2xl tracking-widest">正在穿越雲端同步資料...</p>
+            <p class="text-indigo-600 font-black text-3xl tracking-widest">正在穿越雲端同步資料...</p>
         </div>
     </div>
 
@@ -47,7 +48,7 @@
         </header>
 
         <!-- Incentive Message Section -->
-        <div class="bg-indigo-600 rounded-[3rem] p-10 mb-16 shadow-2xl relative overflow-hidden text-white border-4 border-white/20">
+        <div class="bg-indigo-600 rounded-[3rem] p-12 mb-16 shadow-2xl relative overflow-hidden text-white border-4 border-white/20">
             <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
                 <div class="text-center md:text-left">
                     <h3 class="text-4xl font-black mb-4 flex items-center justify-center md:justify-start">
@@ -55,9 +56,9 @@
                     </h3>
                     <p class="opacity-95 font-bold text-2xl leading-relaxed">所有的進步與創意，都是部門成長的動力。<br>我們將參考這些日誌，作為未來獎金發放與職位調升的重要里程碑！</p>
                 </div>
-                <div class="flex-shrink-0 bg-white/10 p-6 rounded-3xl border border-white/20 text-center">
+                <div class="flex-shrink-0 bg-white/10 p-8 rounded-3xl border border-white/20 text-center">
                     <p class="text-sm uppercase tracking-widest opacity-70 mb-2">Current Mission</p>
-                    <p class="text-3xl font-black italic">Efficiency Boost!</p>
+                    <p class="text-4xl font-black italic text-yellow-300 tracking-tighter">Efficiency Boost!</p>
                 </div>
             </div>
         </div>
@@ -108,19 +109,18 @@
                         <h2 class="text-5xl font-black text-slate-800 tracking-tight flex items-center">
                             <i class="fas fa-map-marked-alt mr-6 text-indigo-500"></i> 探險進度看板
                         </h2>
-                        <div class="text-lg font-black text-slate-400 bg-white px-6 py-3 rounded-full shadow-md border border-slate-100 uppercase tracking-widest">
+                        <div class="text-xl font-black text-slate-400 bg-white px-6 py-3 rounded-full shadow-md border border-slate-100 uppercase tracking-widest">
                             Missions: <span id="projectCount" class="text-indigo-600">0</span>
                         </div>
                     </div>
                     <div id="projectList" class="space-y-10">
-                        <!-- 預設訊息 -->
-                        <div id="statusMessage" class="text-center py-20 text-slate-400 italic text-2xl bg-white/50 rounded-[3rem] border-2 border-dashed">
+                        <div id="statusMessage" class="text-center py-20 text-slate-400 italic text-3xl bg-white/50 rounded-[3rem] border-2 border-dashed">
                             正在啟動雲端連線模組...
                         </div>
                     </div>
                 </div>
 
-                <!-- Leaderboard Section -->
+                <!-- Leaderboard Section (榜單) -->
                 <div class="pt-10">
                     <h2 class="text-5xl font-black text-slate-800 mb-10 flex items-center tracking-tight px-4">
                         <i class="fas fa-medal mr-6 text-yellow-500"></i> 夥伴探險戰力榜
@@ -130,23 +130,23 @@
                             <table class="w-full text-left border-collapse summary-table">
                                 <thead class="bg-indigo-600 text-white uppercase font-black">
                                     <tr>
-                                        <th class="px-10 py-8">冒險英雄</th>
-                                        <th class="px-6 py-8 text-center">探險次數</th>
-                                        <th class="px-6 py-8 text-center">奧援總數</th>
-                                        <th class="px-6 py-8 text-center">平均邏輯</th>
-                                        <th class="px-6 py-8 text-center">平均實用</th>
-                                        <th class="px-6 py-8 text-center text-yellow-300">平均創新</th>
-                                        <th class="px-10 py-8 text-right">成就總分</th>
+                                        <th class="px-10 py-10">英雄同仁</th>
+                                        <th class="px-6 py-10 text-center">專案數</th>
+                                        <th class="px-6 py-10 text-center">奧援次</th>
+                                        <th class="px-6 py-10 text-center">平均邏輯</th>
+                                        <th class="px-6 py-10 text-center">平均實用</th>
+                                        <th class="px-6 py-10 text-center text-yellow-300">平均創新</th>
+                                        <th class="px-10 py-10 text-right">成就總分</th>
                                     </tr>
                                 </thead>
                                 <tbody id="summaryTableBody" class="font-bold text-slate-700">
-                                    <!-- 榜單資料由 JS 產生 -->
+                                    <!-- 資料由 JavaScript 動態填入 -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
-                    <p class="text-center text-slate-500 text-lg mt-8 font-bold italic">
-                        <i class="fas fa-info-circle mr-2"></i> 此排行榜根據所有已完成專案之「奧援評價」實時加權計算
+                    <p class="text-center text-slate-500 text-2xl mt-12 font-bold italic">
+                        <i class="fas fa-info-circle mr-3"></i> 排行榜實時同步，讓我們一起見證創意開花結果！
                     </p>
                 </div>
             </div>
@@ -157,7 +157,7 @@
     <div id="ratingModal" class="fixed inset-0 bg-slate-900/70 hidden flex items-center justify-center z-50 p-6 backdrop-blur-md">
         <div class="bg-white rounded-[4rem] p-12 max-w-lg w-full shadow-2xl border-8 border-white">
             <div class="text-center w-full mb-10">
-                <div class="text-7xl mb-6">💖</div>
+                <div class="text-8xl mb-6">💖</div>
                 <h3 class="text-4xl font-black text-slate-800 mb-4">傳送奧援能量</h3>
                 <p id="ratingProjectName" class="text-indigo-600 font-black text-2xl"></p>
             </div>
@@ -166,8 +166,8 @@
                 
                 <div class="space-y-10 bg-indigo-50/50 p-10 rounded-[3rem] border-2 border-indigo-100">
                     <div class="rating-row" data-category="logic">
-                        <label class="flex justify-between text-base font-black text-slate-500 uppercase tracking-widest mb-2">底層邏輯 <span class="score-display text-indigo-600 font-black text-3xl">0</span></label>
-                        <div class="flex justify-between text-5xl star-row">
+                        <label class="flex justify-between text-base font-black text-slate-500 uppercase tracking-widest mb-2">底層邏輯 <span class="score-display text-indigo-600 font-black text-4xl">0</span></label>
+                        <div class="flex justify-between text-6xl star-row">
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="1"></i>
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="2"></i>
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="3"></i>
@@ -176,8 +176,8 @@
                         </div>
                     </div>
                     <div class="rating-row" data-category="utility">
-                        <label class="flex justify-between text-base font-black text-slate-500 uppercase tracking-widest mb-2">辦公實用性 <span class="score-display text-emerald-500 font-black text-3xl">0</span></label>
-                        <div class="flex justify-between text-5xl star-row">
+                        <label class="flex justify-between text-base font-black text-slate-500 uppercase tracking-widest mb-2">辦公實用性 <span class="score-display text-emerald-500 font-black text-4xl">0</span></label>
+                        <div class="flex justify-between text-6xl star-row">
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="1"></i>
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="2"></i>
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="3"></i>
@@ -186,8 +186,8 @@
                         </div>
                     </div>
                     <div class="rating-row" data-category="innovation">
-                        <label class="flex justify-between text-base font-black text-slate-500 uppercase tracking-widest mb-2">技術創新性 <span class="score-display text-orange-500 font-black text-3xl">0</span></label>
-                        <div class="flex justify-between text-5xl star-row">
+                        <label class="flex justify-between text-base font-black text-slate-500 uppercase tracking-widest mb-2">技術創新性 <span class="score-display text-orange-500 font-black text-4xl">0</span></label>
+                        <div class="flex justify-between text-6xl star-row">
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="1"></i>
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="2"></i>
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="3"></i>
@@ -198,19 +198,19 @@
                 </div>
             </div>
             <div class="flex gap-6 mt-12">
-                <button onclick="closeRatingModal()" class="flex-1 px-4 py-6 bg-slate-100 rounded-3xl font-black text-slate-400 text-2xl transition hover:bg-slate-200">稍後</button>
-                <button onclick="submitMultiVote()" class="flex-2 px-10 py-6 bg-indigo-600 text-white rounded-3xl font-black shadow-2xl text-2xl transition hover:bg-indigo-700 active:scale-95">傳送能量 ⚡</button>
+                <button onclick="closeRatingModal()" class="flex-1 px-4 py-6 bg-slate-100 rounded-3xl font-black text-slate-400 text-3xl">稍後</button>
+                <button onclick="submitMultiVote()" class="flex-2 px-10 py-6 bg-indigo-600 text-white rounded-3xl font-black shadow-2xl text-3xl transition active:scale-95">傳送能量 ⚡</button>
             </div>
         </div>
     </div>
 
     <!-- Toast Message -->
-    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 px-12 py-6 bg-slate-900 text-white rounded-[2rem] shadow-2xl opacity-0 transition-all duration-500 pointer-events-none z-[110] text-xl font-black tracking-widest uppercase">Action Success</div>
+    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 px-16 py-8 bg-slate-900 text-white rounded-[3rem] shadow-2xl opacity-0 transition-all duration-500 pointer-events-none z-[110] text-2xl font-black tracking-widest uppercase">Action Success</div>
 
     <script>
         /**
          * 【核心設定】
-         * 請替換成您在 Google Sheet 部署後獲得的「網頁應用程式 URL」
+         * 已填入您提供的 Google Apps Script 部署 URL
          */
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbwW-rvZr0lOzoJFfQc_t6ML_Ogx80gKEMZ_6C57iflWFiov5KeSQUwIwHtMlu2AlAd9/exec';
 
@@ -224,48 +224,46 @@
             document.getElementById('startDate').value = today;
             document.getElementById('deadline').value = new Date(Date.now() + 14*86400000).toISOString().split('T')[0];
             
-            // 檢查 URL 是否有設定
             if (!GAS_URL || GAS_URL.includes('您的')) {
-                const msg = document.getElementById('statusMessage');
-                msg.innerHTML = '<span class="text-red-500 font-black">⚠️ 系統未就緒：請於程式碼中設定 GAS_URL</span>';
+                document.getElementById('statusMessage').innerHTML = '<span class="text-red-500 font-black">⚠️ 系統未就緒：請於程式碼中設定 GAS_URL</span>';
                 return;
             }
-            
             fetchData();
             setupStars();
         };
 
-        // 從雲端獲取資料 (GET)
+        // 從雲端獲取資料
         async function fetchData() {
             showLoading(true);
             try {
-                const response = await fetch(GAS_URL);
-                if (!response.ok) throw new Error('Network response was not ok');
+                // 加上時間戳記強制刷新快取
+                const response = await fetch(`${GAS_URL}?t=${Date.now()}`, { cache: "no-store" });
+                if (!response.ok) throw new Error('API 無回應');
                 globalData = await response.json();
                 updateUI();
             } catch (e) {
                 console.error(e);
-                showToast("連線失敗！請確認 GAS 權限設為「所有人」");
-                document.getElementById('statusMessage').textContent = "連線異常，請重新整理網頁。";
+                showToast("連線雲端失敗，請確認網址與權限");
+                document.getElementById('statusMessage').textContent = "連線異常，請檢查網路。";
             }
             showLoading(false);
         }
 
-        // 存檔至雲端 (POST)
+        // 存檔資料至雲端
         async function cloudAction(params) {
             showLoading(true);
             try {
-                const response = await fetch(GAS_URL, {
+                await fetch(GAS_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // 重要：避免 CORS 阻擋，資料仍會送達
+                    mode: 'no-cors', // 處理跨域請求
                     body: JSON.stringify(params)
                 });
-                // 因為 no-cors 無法讀取回傳值，我們稍等一下後直接刷新
-                showToast("同步中...");
-                setTimeout(fetchData, 1500); 
+                showToast("資料已傳送...");
+                // 延遲一段時間讓 Google 處理完後刷新
+                setTimeout(fetchData, 2000); 
             } catch (e) {
                 console.error(e);
-                showToast("存檔失敗，請確認網路連線");
+                showToast("雲端同步失敗");
                 showLoading(false);
             }
         }
@@ -279,64 +277,56 @@
         function renderProjects(items) {
             const list = document.getElementById('projectList');
             if (items.length === 0) {
-                list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-2xl bg-white/50 rounded-[3rem] border-2 border-dashed">目前尚無探險點子，快來當第一人！</div>';
+                list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-3xl bg-white/50 rounded-[3rem] border-2 border-dashed">目前雲端尚未有任何探險紀錄，快來登錄第一個點子吧！</div>';
                 return;
             }
             list.innerHTML = [...items].reverse().map(item => {
                 const voters = Object.keys(item.votes || {});
-                const votesCount = voters.length;
-                let scores = { logic: 0, utility: 0, innovation: 0, avg: 0 };
-                if (votesCount > 0) {
+                const vCount = voters.length;
+                let sc = { logic: 0, utility: 0, innovation: 0, avg: 0 };
+                if (vCount > 0) {
                     voters.forEach(n => { 
-                        scores.logic += Number(item.votes[n].logic); 
-                        scores.utility += Number(item.votes[n].utility);
-                        scores.innovation += Number(item.votes[n].innovation || 0);
+                        sc.logic += Number(item.votes[n].logic || 0); 
+                        sc.utility += Number(item.votes[n].utility || 0);
+                        sc.innovation += Number(item.votes[n].innovation || 0);
                     });
-                    scores.logic = (scores.logic / votesCount).toFixed(1);
-                    scores.utility = (scores.utility / votesCount).toFixed(1);
-                    scores.innovation = (scores.innovation / votesCount).toFixed(1);
-                    scores.avg = ((parseFloat(scores.logic) + parseFloat(scores.utility) + parseFloat(scores.innovation)) / 3).toFixed(1);
-                } else { scores.logic = scores.utility = scores.innovation = scores.avg = '—'; }
+                    sc.avg = ((sc.logic + sc.utility + sc.innovation) / (vCount * 3)).toFixed(1);
+                } else { sc.avg = '—'; }
 
                 return `
                 <div class="adventure-card p-12 shadow-xl border-4 border-white transition-all hover:shadow-2xl hover:bg-white group">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
                         <div class="flex-1">
                             <div class="flex flex-wrap items-center gap-4 mb-6">
-                                <span class="px-5 py-2 bg-indigo-100 text-indigo-700 rounded-full text-sm font-black uppercase tracking-widest border-2 border-indigo-200">Discovery Mission</span>
-                                <span class="text-base text-slate-500 font-bold bg-slate-50 px-5 py-2 rounded-full border border-slate-200">
-                                    <i class="far fa-compass mr-3 text-indigo-500"></i>${formatDate(item.startDate)} ➔ <span class="text-orange-600 font-black">抵達日: ${formatDate(item.deadline)}</span>
+                                <span class="px-5 py-2 bg-indigo-100 text-indigo-700 rounded-full text-base font-black border-2 border-indigo-200 uppercase tracking-widest">Mission Log</span>
+                                <span class="text-xl text-slate-500 font-bold bg-slate-50 px-6 py-2 rounded-full border border-slate-200">
+                                    <i class="far fa-compass mr-3 text-indigo-500"></i>${formatDate(item.startDate)} ➔ <span class="text-orange-600 font-black">抵達: ${formatDate(item.deadline)}</span>
                                 </span>
                             </div>
-                            <h3 class="text-5xl font-black text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors mb-6">${item.topic}</h3>
-                            <div class="flex flex-wrap items-center gap-8">
-                                <span class="text-indigo-600 font-black text-2xl italic flex items-center">
-                                    <div class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center mr-4 text-xl border-2 border-white shadow-sm"><i class="fas fa-user-ninja"></i></div>
+                            <h3 class="text-5xl font-black text-slate-800 leading-tight group-hover:text-indigo-600 mb-6">${item.topic}</h3>
+                            <div class="flex flex-wrap items-center gap-10">
+                                <span class="text-indigo-600 font-black text-3xl italic flex items-center">
+                                    <div class="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mr-4 text-2xl border-2 border-white shadow-sm"><i class="fas fa-user-ninja"></i></div>
                                     @${item.name}
                                 </span>
-                                <div class="flex items-center gap-8 bg-slate-50/80 backdrop-blur-sm px-8 py-4 rounded-[2rem] border-2 border-white shadow-inner">
-                                    <div class="flex items-center text-amber-500 text-2xl font-black"><i class="fas fa-bolt mr-3 text-yellow-500 text-3xl"></i>成就 ${scores.avg}</div>
-                                    <div class="w-0.5 h-8 bg-slate-200"></div>
-                                    <div class="text-sm text-slate-400 font-black tracking-widest uppercase">L:${scores.logic} | U:${scores.utility} | I:${scores.innovation}</div>
+                                <div class="flex items-center gap-10 bg-slate-50/80 px-8 py-4 rounded-[2rem] border-2 border-white shadow-inner">
+                                    <div class="flex items-center text-amber-500 text-3xl font-black"><i class="fas fa-bolt mr-3 text-yellow-500"></i>成就 ${sc.avg}</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex items-center gap-5 w-full md:w-auto">
-                            <span class="px-8 py-4 rounded-3xl text-sm font-black uppercase tracking-widest shadow-lg border-b-8 transition-all ${getStatusClass(item.status)}">${item.status}</span>
-                            <div class="flex gap-3">
-                                <button onclick="toggleStatus('${item.id}')" title="切換狀態" class="p-5 bg-white text-slate-400 hover:text-indigo-600 rounded-[1.5rem] transition shadow-md border-2 border-slate-100 hover:shadow-xl"><i class="fas fa-sync-alt text-2xl"></i></button>
-                                ${item.status === '✨ 圓滿達成目標' ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-indigo-600 text-white px-12 py-5 rounded-[1.5rem] font-black text-sm tracking-[0.4em] shadow-xl hover:bg-indigo-700 hover:-translate-y-1 transition active:scale-95">奧援</button>` : ''}
-                                <button onclick="deleteProject('${item.id}')" class="p-5 text-slate-100 hover:text-red-500 transition"><i class="far fa-trash-alt text-2xl"></i></button>
+                        <div class="flex items-center gap-6 w-full md:w-auto">
+                            <span class="px-10 py-5 rounded-3xl text-lg font-black uppercase tracking-widest shadow-lg border-b-8 transition-all ${getStatusClass(item.status)}">${item.status}</span>
+                            <div class="flex gap-4">
+                                <button onclick="toggleStatus('${item.id}')" title="切換狀態" class="p-6 bg-white text-slate-400 hover:text-indigo-600 rounded-[2rem] transition shadow-md border-2 border-slate-100"><i class="fas fa-sync-alt text-3xl"></i></button>
+                                ${item.status === '✨ 圓滿達成目標' ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-indigo-600 text-white px-14 py-6 rounded-[2rem] font-black text-lg tracking-[0.4em] shadow-xl hover:bg-indigo-700 active:scale-95">奧援</button>` : ''}
+                                <button onclick="deleteProject('${item.id}')" class="p-6 text-slate-100 hover:text-red-500 transition"><i class="far fa-trash-alt text-3xl"></i></button>
                             </div>
                         </div>
                     </div>
-                    ${isAdminView && votesCount > 0 ? `<div class="admin-only mt-12 pt-12 border-t-4 border-dashed border-slate-100">
-                        <p class="text-sm font-black text-slate-400 uppercase tracking-[0.3em] mb-6">奧援戰歷</p>
-                        <div class="flex flex-wrap gap-4">
-                            ${voters.map(v => `<div class="bg-white px-6 py-4 rounded-3xl border-2 border-slate-100 shadow-sm text-base font-black">
-                                <span class="text-indigo-600 text-xl mr-2">${v}</span>: L:${item.votes[v].logic} U:${item.votes[v].utility} I:${item.votes[v].innovation}
-                            </div>`).join('')}
-                        </div>
+                    ${isAdminView && vCount > 0 ? `<div class="admin-only mt-12 pt-12 border-t-4 border-dashed border-slate-100 flex flex-wrap gap-4">
+                        ${voters.map(v => `<div class="bg-white px-8 py-5 rounded-3xl border-2 border-slate-100 shadow-sm text-xl font-black">
+                            <span class="text-indigo-600 text-2xl mr-3">${v}</span>: L:${item.votes[v].logic} U:${item.votes[v].utility} I:${item.votes[v].innovation}
+                        </div>`).join('')}
                     </div>` : ''}
                 </div>`;
             }).join('');
@@ -346,44 +336,44 @@
         function renderSummary(items) {
             const stats = {};
             items.forEach(item => {
-                if (!stats[item.name]) stats[item.name] = { total: 0, logic: 0, utility: 0, innovation: 0, voteCount: 0 };
+                if (!stats[item.name]) stats[item.name] = { total: 0, logic: 0, utility: 0, innovation: 0, vCount: 0 };
                 stats[item.name].total++;
                 const votes = Object.values(item.votes || {});
                 if (votes.length > 0) {
                     votes.forEach(v => { 
-                        stats[item.name].logic += Number(v.logic); 
-                        stats[item.name].utility += Number(v.utility); 
+                        stats[item.name].logic += Number(v.logic || 0); 
+                        stats[item.name].utility += Number(v.utility || 0); 
                         stats[item.name].innovation += Number(v.innovation || 0); 
-                        stats[item.name].voteCount++; 
+                        stats[item.name].vCount++; 
                     });
                 }
             });
             const sorted = Object.keys(stats).sort((a,b) => {
-                const scoreB = (stats[b].logic + stats[b].utility + stats[b].innovation) / (stats[b].voteCount * 3 || 1);
-                const scoreA = (stats[a].logic + stats[a].utility + stats[a].innovation) / (stats[a].voteCount * 3 || 1);
-                return scoreB - scoreA;
+                const sB = (stats[b].logic + stats[b].utility + stats[b].innovation) / (stats[b].vCount * 3 || 1);
+                const sA = (stats[a].logic + stats[a].utility + stats[a].innovation) / (stats[a].vCount * 3 || 1);
+                return sB - sA;
             });
 
-            document.getElementById('summaryTableBody').innerHTML = sorted.map((name, index) => {
+            document.getElementById('summaryTableBody').innerHTML = sorted.map((name, idx) => {
                 const s = stats[name];
-                const avgL = s.voteCount > 0 ? (s.logic / s.voteCount).toFixed(1) : '0.0';
-                const avgU = s.voteCount > 0 ? (s.utility / s.voteCount).toFixed(1) : '0.0';
-                const avgI = s.voteCount > 0 ? (s.innovation / s.voteCount).toFixed(1) : '0.0';
+                const avgL = s.vCount > 0 ? (s.logic / s.vCount).toFixed(1) : '0.0';
+                const avgU = s.vCount > 0 ? (s.utility / s.vCount).toFixed(1) : '0.0';
+                const avgI = s.vCount > 0 ? (s.innovation / s.vCount).toFixed(1) : '0.0';
                 const totalAvg = ((parseFloat(avgL) + parseFloat(avgU) + parseFloat(avgI)) / 3).toFixed(1);
-                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '👤';
+                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '👤';
 
                 return `
-                <tr class="border-t-2 border-slate-100 hover:bg-indigo-50/50 transition group">
-                    <td class="px-10 py-10 font-black text-slate-800 text-3xl italic">
-                        <span class="mr-6 inline-block transform group-hover:scale-125 transition-transform">${medal}</span>@${name}
+                <tr class="border-t-4 border-slate-100 hover:bg-indigo-50/50 transition group">
+                    <td class="px-10 py-12 font-black text-slate-800 text-4xl">
+                        <span class="mr-6 inline-block transform group-hover:rotate-12 transition-transform">${medal}</span>@${name}
                     </td>
-                    <td class="px-6 py-10 text-center text-slate-400 text-3xl font-mono">${s.total}</td>
-                    <td class="px-6 py-10 text-center text-slate-400 font-black text-3xl font-mono">${s.voteCount}</td>
-                    <td class="px-6 py-10 text-center font-bold text-slate-400 italic text-2xl">${avgL}</td>
-                    <td class="px-6 py-10 text-center font-bold text-slate-400 italic text-2xl">${avgU}</td>
-                    <td class="px-6 py-10 text-center font-bold text-orange-400 italic text-2xl">${avgI}</td>
-                    <td class="px-10 py-10 text-right">
-                        <span class="bg-indigo-600 text-white px-10 py-4 rounded-3xl font-black shadow-xl ring-8 ring-indigo-50 text-4xl font-mono">${totalAvg}</span>
+                    <td class="px-6 py-12 text-center text-slate-400 text-4xl font-mono">${s.total}</td>
+                    <td class="px-6 py-12 text-center text-slate-400 font-black text-4xl font-mono">${s.vCount}</td>
+                    <td class="px-6 py-12 text-center font-bold text-slate-400 italic text-3xl">${avgL}</td>
+                    <td class="px-6 py-12 text-center font-bold text-slate-400 italic text-3xl">${avgU}</td>
+                    <td class="px-6 py-12 text-center font-bold text-orange-400 italic text-3xl">${avgI}</td>
+                    <td class="px-10 py-12 text-right">
+                        <span class="bg-indigo-600 text-white px-12 py-6 rounded-[2.5rem] font-black shadow-2xl ring-[12px] ring-indigo-50 text-5xl font-mono">${totalAvg}</span>
                     </td>
                 </tr>`;
             }).join('');
@@ -392,15 +382,11 @@
         // --- Core Functions ---
         document.getElementById('aiForm').onsubmit = async (e) => {
             e.preventDefault();
-            const name = document.getElementById('name').value.trim();
-            const topic = document.getElementById('topic').value.trim();
-            if (!name || !topic) return;
-
             const newProject = {
                 action: 'create',
                 id: Date.now(),
-                name: name,
-                topic: topic,
+                name: document.getElementById('name').value.trim(),
+                topic: document.getElementById('topic').value.trim(),
                 startDate: document.getElementById('startDate').value,
                 deadline: document.getElementById('deadline').value,
                 status: '🚀 正在起飛'
@@ -410,73 +396,42 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startDate').value = today;
             document.getElementById('deadline').value = new Date(Date.now() + 14*86400000).toISOString().split('T')[0];
-            showToast("點子已傳送至雲端！🌟");
         };
 
         async function toggleStatus(id) {
             const item = globalData.find(p => p.id.toString() === id.toString());
-            if (!item) return;
             const states = ['🚀 正在起飛', '🔍 實驗室調校中', '✨ 圓滿達成目標'];
-            const newStatus = states[(states.indexOf(item.status) + 1) % 3];
-            await cloudAction({ action: 'updateStatus', id: id, status: newStatus });
+            const nStatus = states[(states.indexOf(item.status) + 1) % 3];
+            await cloudAction({ action: 'updateStatus', id: id, status: nStatus });
         }
 
         async function submitMultiVote() {
             const voter = document.getElementById('voterName').value.trim();
-            if (!voter || Object.values(selectedScores).some(v => v === 0)) {
-                showToast("每個能量維度都必須填滿喔！");
-                return;
-            }
+            if (!voter || Object.values(selectedScores).some(v => v === 0)) return showToast("每個維度都要填喔！");
             const item = globalData.find(p => p.id.toString() === currentRatingProjectId.toString());
-            if (item.name === voter) {
-                showToast("不能奧援自己啦！要謙虛喔 😊");
-                return;
-            }
+            if (item.name === voter) return showToast("不能給自己發送奧援喔！");
             
-            const newVotes = { ...(item.votes || {}) };
-            newVotes[voter] = { ...selectedScores, time: new Date().toLocaleString() };
-            
-            await cloudAction({ action: 'updateVote', id: currentRatingProjectId, votes: newVotes });
+            const nVotes = { ...(item.votes || {}) };
+            nVotes[voter] = { ...selectedScores, time: new Date().toLocaleString() };
+            await cloudAction({ action: 'updateVote', id: currentRatingProjectId, votes: nVotes });
             closeRatingModal();
-            showToast("奧援能量發送完畢！⚡");
         }
 
         async function deleteProject(id) {
-            if (confirm("這會從雲端永久刪除這個點子，確定嗎？")) {
-                await cloudAction({ action: 'delete', id: id });
-            }
+            if (confirm("這會從雲端刪除，確定嗎？")) await cloudAction({ action: 'delete', id: id });
         }
 
         // --- UI Utils ---
-        function showLoading(show) { document.getElementById('loading').style.display = show ? 'flex' : 'none'; }
-        function showToast(m) { 
-            const t = document.getElementById('toast'); 
-            t.textContent = m; 
-            t.style.opacity = '1'; 
-            t.style.transform = 'translate(-50%, -20px)';
-            setTimeout(() => {
-                t.style.opacity = '0';
-                t.style.transform = 'translate(-50%, 0)';
-            }, 3000); 
-        }
-        function toggleAdminView() { 
-            isAdminView = !isAdminView; 
-            const btn = document.getElementById('adminBtn');
-            btn.classList.toggle('text-indigo-600', isAdminView);
-            btn.classList.toggle('border-indigo-600', isAdminView);
-            updateUI(); 
-        }
-        function applyAdminVisibility() { document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdminView ? 'block' : 'none'); }
+        function showLoading(s) { document.getElementById('loading').style.display = s ? 'flex' : 'none'; }
+        function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 3000); }
+        function toggleAdminView() { isAdminView = !isAdminView; updateUI(); }
+        function applyAdminVisibility() { document.querySelectorAll('.admin-only').forEach(e => e.style.display = isAdminView ? 'block' : 'none'); }
         function getStatusClass(s) { 
             if (s === '✨ 圓滿達成目標') return 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-100';
             if (s === '🔍 實驗室調校中') return 'bg-amber-400 text-white border-amber-500 shadow-amber-100';
             return 'bg-indigo-600 text-white border-indigo-700 shadow-indigo-100';
         }
-        function formatDate(d) {
-            if (!d) return '';
-            const date = new Date(d);
-            return isNaN(date.getTime()) ? d : `${date.getMonth()+1}/${date.getDate()}`;
-        }
+        function formatDate(d) { if (!d) return ''; const date = new Date(d); return `${date.getMonth()+1}/${date.getDate()}`; }
         function openRatingModal(id, title) {
             currentRatingProjectId = id; selectedScores = { logic: 0, utility: 0, innovation: 0 };
             document.getElementById('ratingProjectName').textContent = title;
