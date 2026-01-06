@@ -6,7 +6,7 @@ function doGet() {
   const json = data.map(row => {
     let obj = {};
     headers.forEach((header, i) => {
-      let head = header.toString().toLowerCase();
+      let head = header.toString().trim().toLowerCase();
       if (head === 'votes' && row[i]) {
         try { obj['votes'] = JSON.parse(row[i]); } catch(e) { obj['votes'] = {}; }
       } else {
@@ -23,7 +23,7 @@ function doPost(e) {
   const params = JSON.parse(e.postData.contents);
   const action = params.action;
   const data = sheet.getDataRange().getValues();
-  const headers = data[0].map(h => h.toString().toLowerCase());
+  const headers = data[0].map(h => h.toString().trim().toLowerCase());
 
   if (action === 'create') {
     sheet.appendRow([params.id, params.name, params.topic, params.startDate, params.deadline, params.status, JSON.stringify({})]);
