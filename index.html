@@ -94,8 +94,8 @@
                         </button>
                     </form>
                     <div class="mt-10 pt-8 border-t border-slate-200">
-                        <button onclick="toggleAdminView()" id="adminBtn" class="w-full py-3 text-sm font-black text-slate-400 hover:text-indigo-600 tracking-[0.2em] transition border-2 border-dashed border-slate-200 rounded-2xl uppercase">
-                            <i class="fas fa-shield-alt mr-2"></i> 管理模式
+                        <button onclick="toggleAdminView()" id="adminBtn" class="w-full py-4 text-sm font-black text-slate-400 hover:text-indigo-600 tracking-[0.2em] transition border-2 border-dashed border-slate-200 rounded-2xl uppercase">
+                            <i class="fas fa-shield-alt mr-2"></i> 管理模式: 關閉
                         </button>
                     </div>
                 </div>
@@ -120,7 +120,7 @@
                     </div>
                 </div>
 
-                <!-- Leaderboard Section (榜單) -->
+                <!-- Leaderboard Section -->
                 <div class="pt-10">
                     <h2 class="text-5xl font-black text-slate-800 mb-10 flex items-center tracking-tight px-4">
                         <i class="fas fa-medal mr-6 text-yellow-500"></i> 夥伴探險戰力榜
@@ -139,9 +139,7 @@
                                         <th class="px-10 py-10 text-right">成就總分</th>
                                     </tr>
                                 </thead>
-                                <tbody id="summaryTableBody" class="font-bold text-slate-700">
-                                    <!-- 資料由 JavaScript 動態填入 -->
-                                </tbody>
+                                <tbody id="summaryTableBody" class="font-bold text-slate-700"></tbody>
                             </table>
                         </div>
                     </div>
@@ -199,19 +197,15 @@
             </div>
             <div class="flex gap-6 mt-12">
                 <button onclick="closeRatingModal()" class="flex-1 px-4 py-6 bg-slate-100 rounded-3xl font-black text-slate-400 text-3xl">稍後</button>
-                <button onclick="submitMultiVote()" class="flex-2 px-10 py-6 bg-indigo-600 text-white rounded-3xl font-black shadow-2xl text-3xl transition active:scale-95">傳送能量 ⚡</button>
+                <button onclick="submitMultiVote()" class="flex-2 px-10 py-6 bg-indigo-600 text-white rounded-3xl font-black shadow-2xl text-3xl transition active:scale-95">傳送 ⚡</button>
             </div>
         </div>
     </div>
 
     <!-- Toast Message -->
-    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 px-16 py-8 bg-slate-900 text-white rounded-[3rem] shadow-2xl opacity-0 transition-all duration-500 pointer-events-none z-[110] text-2xl font-black tracking-widest uppercase">Action Success</div>
+    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 px-16 py-8 bg-slate-900 text-white rounded-[3rem] shadow-2xl opacity-0 transition-all duration-500 pointer-events-none z-[110] text-2xl font-black tracking-widest uppercase">Success!</div>
 
     <script>
-        /**
-         * 【核心設定】
-         * 已填入您提供的 Google Apps Script 部署 URL
-         */
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbwW-rvZr0lOzoJFfQc_t6ML_Ogx80gKEMZ_6C57iflWFiov5KeSQUwIwHtMlu2AlAd9/exec';
 
         let currentRatingProjectId = null;
@@ -223,47 +217,37 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startDate').value = today;
             document.getElementById('deadline').value = new Date(Date.now() + 14*86400000).toISOString().split('T')[0];
-            
-            if (!GAS_URL || GAS_URL.includes('您的')) {
-                document.getElementById('statusMessage').innerHTML = '<span class="text-red-500 font-black">⚠️ 系統未就緒：請於程式碼中設定 GAS_URL</span>';
-                return;
-            }
             fetchData();
             setupStars();
         };
 
-        // 從雲端獲取資料
         async function fetchData() {
             showLoading(true);
             try {
-                // 加上時間戳記強制刷新快取
                 const response = await fetch(`${GAS_URL}?t=${Date.now()}`, { cache: "no-store" });
                 if (!response.ok) throw new Error('API 無回應');
                 globalData = await response.json();
                 updateUI();
             } catch (e) {
                 console.error(e);
-                showToast("連線雲端失敗，請確認網址與權限");
-                document.getElementById('statusMessage').textContent = "連線異常，請檢查網路。";
+                showToast("連線雲端失敗");
             }
             showLoading(false);
         }
 
-        // 存檔資料至雲端
         async function cloudAction(params) {
             showLoading(true);
             try {
                 await fetch(GAS_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // 處理跨域請求
+                    mode: 'no-cors',
                     body: JSON.stringify(params)
                 });
-                showToast("資料已傳送...");
-                // 延遲一段時間讓 Google 處理完後刷新
+                showToast("同步傳送中...");
                 setTimeout(fetchData, 2000); 
             } catch (e) {
                 console.error(e);
-                showToast("雲端同步失敗");
+                showToast("存檔失敗");
                 showLoading(false);
             }
         }
@@ -277,7 +261,7 @@
         function renderProjects(items) {
             const list = document.getElementById('projectList');
             if (items.length === 0) {
-                list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-3xl bg-white/50 rounded-[3rem] border-2 border-dashed">目前雲端尚未有任何探險紀錄，快來登錄第一個點子吧！</div>';
+                list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-3xl bg-white/50 rounded-[3rem] border-2 border-dashed">目前雲端尚未有任何探險紀錄。</div>';
                 return;
             }
             list.innerHTML = [...items].reverse().map(item => {
@@ -293,6 +277,9 @@
                     sc.avg = ((sc.logic + sc.utility + sc.innovation) / (vCount * 3)).toFixed(1);
                 } else { sc.avg = '—'; }
 
+                // 為了避開 Emoji 判斷問題，判斷是否包含特定關鍵字
+                const isCompleted = item.status && item.status.includes('達成');
+
                 return `
                 <div class="adventure-card p-12 shadow-xl border-4 border-white transition-all hover:shadow-2xl hover:bg-white group">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
@@ -303,7 +290,7 @@
                                     <i class="far fa-compass mr-3 text-indigo-500"></i>${formatDate(item.startDate)} ➔ <span class="text-orange-600 font-black">抵達: ${formatDate(item.deadline)}</span>
                                 </span>
                             </div>
-                            <h3 class="text-5xl font-black text-slate-800 leading-tight group-hover:text-indigo-600 mb-6">${item.topic}</h3>
+                            <h3 class="text-5xl font-black text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors mb-6">${item.topic}</h3>
                             <div class="flex flex-wrap items-center gap-10">
                                 <span class="text-indigo-600 font-black text-3xl italic flex items-center">
                                     <div class="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mr-4 text-2xl border-2 border-white shadow-sm"><i class="fas fa-user-ninja"></i></div>
@@ -315,22 +302,23 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-6 w-full md:w-auto">
-                            <span class="px-10 py-5 rounded-3xl text-lg font-black uppercase tracking-widest shadow-lg border-b-8 transition-all ${getStatusClass(item.status)}">${item.status}</span>
+                            <span class="px-10 py-5 rounded-3xl text-lg font-black tracking-widest border-b-8 transition-all ${getStatusClass(item.status)}">${item.status || '🚀 正在起飛'}</span>
                             <div class="flex gap-4">
-                                <button onclick="toggleStatus('${item.id}')" title="切換狀態" class="p-6 bg-white text-slate-400 hover:text-indigo-600 rounded-[2rem] transition shadow-md border-2 border-slate-100"><i class="fas fa-sync-alt text-3xl"></i></button>
-                                ${item.status === '✨ 圓滿達成目標' ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-indigo-600 text-white px-14 py-6 rounded-[2rem] font-black text-lg tracking-[0.4em] shadow-xl hover:bg-indigo-700 active:scale-95">奧援</button>` : ''}
+                                <button onclick="toggleStatus('${item.id}')" class="p-6 bg-white text-slate-400 hover:text-indigo-600 rounded-[2rem] transition shadow-md border-2 border-slate-100"><i class="fas fa-sync-alt text-3xl"></i></button>
+                                ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-indigo-600 text-white px-14 py-6 rounded-[2rem] font-black text-lg tracking-[0.4em] shadow-xl hover:bg-indigo-700 active:scale-95">奧援</button>` : ''}
                                 <button onclick="deleteProject('${item.id}')" class="p-6 text-slate-100 hover:text-red-500 transition"><i class="far fa-trash-alt text-3xl"></i></button>
                             </div>
                         </div>
                     </div>
-                    ${isAdminView && vCount > 0 ? `<div class="admin-only mt-12 pt-12 border-t-4 border-dashed border-slate-100 flex flex-wrap gap-4">
-                        ${voters.map(v => `<div class="bg-white px-8 py-5 rounded-3xl border-2 border-slate-100 shadow-sm text-xl font-black">
+                    <!-- 管理模式日誌 -->
+                    <div class="${isAdminView ? 'block' : 'hidden'} mt-12 pt-12 border-t-4 border-dashed border-slate-100 flex flex-wrap gap-4">
+                        <p class="w-full text-sm font-black text-slate-400 uppercase tracking-[0.3em] mb-4">奧援戰歷 (僅管理員可見)</p>
+                        ${voters.length > 0 ? voters.map(v => `<div class="bg-white px-8 py-5 rounded-3xl border-2 border-slate-100 shadow-sm text-xl font-black">
                             <span class="text-indigo-600 text-2xl mr-3">${v}</span>: L:${item.votes[v].logic} U:${item.votes[v].utility} I:${item.votes[v].innovation}
-                        </div>`).join('')}
-                    </div>` : ''}
+                        </div>`).join('') : '<p class="text-slate-400 italic">尚無奧援紀錄</p>'}
+                    </div>
                 </div>`;
             }).join('');
-            applyAdminVisibility();
         }
 
         function renderSummary(items) {
@@ -361,7 +349,6 @@
                 const avgI = s.vCount > 0 ? (s.innovation / s.vCount).toFixed(1) : '0.0';
                 const totalAvg = ((parseFloat(avgL) + parseFloat(avgU) + parseFloat(avgI)) / 3).toFixed(1);
                 const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '👤';
-
                 return `
                 <tr class="border-t-4 border-slate-100 hover:bg-indigo-50/50 transition group">
                     <td class="px-10 py-12 font-black text-slate-800 text-4xl">
@@ -379,12 +366,10 @@
             }).join('');
         }
 
-        // --- Core Functions ---
         document.getElementById('aiForm').onsubmit = async (e) => {
             e.preventDefault();
             const newProject = {
-                action: 'create',
-                id: Date.now(),
+                action: 'create', id: Date.now(),
                 name: document.getElementById('name').value.trim(),
                 topic: document.getElementById('topic').value.trim(),
                 startDate: document.getElementById('startDate').value,
@@ -393,15 +378,16 @@
             };
             await cloudAction(newProject);
             e.target.reset();
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('startDate').value = today;
-            document.getElementById('deadline').value = new Date(Date.now() + 14*86400000).toISOString().split('T')[0];
         };
 
         async function toggleStatus(id) {
             const item = globalData.find(p => p.id.toString() === id.toString());
+            if (!item) return;
             const states = ['🚀 正在起飛', '🔍 實驗室調校中', '✨ 圓滿達成目標'];
-            const nStatus = states[(states.indexOf(item.status) + 1) % 3];
+            // 處理 item.status 為 undefined 或不匹配的情況
+            let currentIdx = states.indexOf(item.status);
+            if (currentIdx === -1) currentIdx = 0;
+            const nStatus = states[(currentIdx + 1) % 3];
             await cloudAction({ action: 'updateStatus', id: id, status: nStatus });
         }
 
@@ -410,7 +396,6 @@
             if (!voter || Object.values(selectedScores).some(v => v === 0)) return showToast("每個維度都要填喔！");
             const item = globalData.find(p => p.id.toString() === currentRatingProjectId.toString());
             if (item.name === voter) return showToast("不能給自己發送奧援喔！");
-            
             const nVotes = { ...(item.votes || {}) };
             nVotes[voter] = { ...selectedScores, time: new Date().toLocaleString() };
             await cloudAction({ action: 'updateVote', id: currentRatingProjectId, votes: nVotes });
@@ -421,17 +406,22 @@
             if (confirm("這會從雲端刪除，確定嗎？")) await cloudAction({ action: 'delete', id: id });
         }
 
-        // --- UI Utils ---
+        function toggleAdminView() {
+            isAdminView = !isAdminView;
+            const btn = document.getElementById('adminBtn');
+            btn.innerHTML = isAdminView ? `<i class="fas fa-lock-open mr-2"></i> 管理模式: 開啟` : `<i class="fas fa-shield-alt mr-2"></i> 管理模式: 關閉`;
+            updateUI(); 
+            showToast(isAdminView ? "管理視野已展開" : "回到勇者視野");
+        }
+
         function showLoading(s) { document.getElementById('loading').style.display = s ? 'flex' : 'none'; }
         function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 3000); }
-        function toggleAdminView() { isAdminView = !isAdminView; updateUI(); }
-        function applyAdminVisibility() { document.querySelectorAll('.admin-only').forEach(e => e.style.display = isAdminView ? 'block' : 'none'); }
         function getStatusClass(s) { 
-            if (s === '✨ 圓滿達成目標') return 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-100';
-            if (s === '🔍 實驗室調校中') return 'bg-amber-400 text-white border-amber-500 shadow-amber-100';
+            if (s && s.includes('達成')) return 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-100';
+            if (s && s.includes('調校')) return 'bg-amber-400 text-white border-amber-500 shadow-amber-100';
             return 'bg-indigo-600 text-white border-indigo-700 shadow-indigo-100';
         }
-        function formatDate(d) { if (!d) return ''; const date = new Date(d); return `${date.getMonth()+1}/${date.getDate()}`; }
+        function formatDate(d) { if (!d) return ''; const date = new Date(d); return isNaN(date.getTime()) ? d : `${date.getMonth()+1}/${date.getDate()}`; }
         function openRatingModal(id, title) {
             currentRatingProjectId = id; selectedScores = { logic: 0, utility: 0, innovation: 0 };
             document.getElementById('ratingProjectName').textContent = title;
