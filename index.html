@@ -528,7 +528,7 @@
 
         function toggleAdminView() {
             if (!isAdminView) {
-                const input = prompt("🔐 請輸入管理員解鎖密碼 (8888):");
+                const input = prompt("🔐 請輸入管理員解鎖密碼:");
                 if (input !== ADMIN_PWD) return showToast("ACCESS DENIED");
             }
             isAdminView = !isAdminView;
