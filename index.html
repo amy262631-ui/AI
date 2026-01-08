@@ -3,171 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 創新探險日誌 - 雲端連線版</title>
+    <title>AI 創新探險日誌</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;700;900&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
-        .adventure-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px); border-radius: 2rem; }
-        .star-rating-active { color: #fbbf24; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .pulse-soft { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        .loading-overlay { background: rgba(255,255,255,0.8); display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');
         
-        /* 榜單表格字體極大化 */
-        .summary-table th { font-size: 1.25rem; padding: 1.5rem 1rem; }
-        .summary-table td { font-size: 1.8rem; vertical-align: middle; padding: 2rem 1rem; }
-        .achievement-score { font-size: 3.5rem; line-height: 1; }
+        :root {
+            --game-pink: #ff4d91;
+            --game-purple: #7000ff;
+            --game-cyan: #00f2ff;
+            --game-yellow: #ffee00;
+        }
 
-        /* 看板字體微調（適中尺寸） */
-        .kanban-title { font-size: 1.875rem; font-weight: 900; } 
-        .kanban-subtext { font-size: 1.1rem; }
-        .kanban-user-text { font-size: 1.25rem; }
+        body { 
+            font-family: 'Noto Sans TC', sans-serif; 
+            background: #f0f2f9;
+            background-image: radial-gradient(#d1d5db 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: #2d3748;
+        }
+
+        /* 遊戲質感卡片 */
+        .adventure-card { 
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(12px); 
+            border-radius: 2.5rem; 
+            box-shadow: 0 15px 35px -5px rgba(112, 0, 255, 0.1);
+            border: 3px solid #ffffff;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .adventure-card:hover {
+            transform: translateY(-5px) scale(1.01);
+            box-shadow: 0 25px 45px -10px rgba(112, 0, 255, 0.2);
+            border-color: var(--game-purple);
+        }
+
+        .btn-game {
+            transition: all 0.2s;
+            box-shadow: 0 4px 0px #4a00aa;
+        }
+        .btn-game:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0px #4a00aa;
+        }
+
+        .star-rating-active { color: var(--game-yellow); text-shadow: 0 0 10px rgba(255, 238, 0, 0.5); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        .pulse-soft { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        
+        .loading-overlay { background: rgba(240, 242, 249, 0.9); display: none; }
+
+        /* 榜單極大化樣式 */
+        .summary-table th { font-size: 1.2rem; background: var(--game-purple); color: white; padding: 1.5rem; border: none; }
+        .summary-table td { font-size: 1.8rem; padding: 2.5rem 1.5rem; border-bottom: 2px solid #edf2f7; }
+        .achievement-score { 
+            font-size: 3.5rem; 
+            background: linear-gradient(to right, var(--game-pink), var(--game-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+        }
+
+        /* 名字與分數等大設定 */
+        .hero-name-font { font-size: 1.75rem; font-weight: 900; }
+        .hero-score-font { font-size: 1.75rem; font-weight: 900; }
+
+        .name-cell { white-space: nowrap !important; }
+        
+        /* 側邊欄輸入框遊戲感 */
+        input { border: 2px solid #e2e8f0 !important; border-radius: 1.2rem !important; }
+        input:focus { border-color: var(--game-purple) !important; box-shadow: 0 0 0 4px rgba(112, 0, 255, 0.1) !important; }
     </style>
 </head>
-<body class="min-h-screen py-10 px-4">
+<body class="min-h-screen py-10 px-6">
 
-    <!-- 同步 Loading 遮罩 -->
+    <!-- 同步遮罩 -->
     <div id="loading" class="fixed inset-0 z-[100] flex items-center justify-center loading-overlay backdrop-blur-sm">
         <div class="text-center">
-            <i class="fas fa-rocket text-7xl text-indigo-600 mb-4 animate-bounce"></i>
-            <p class="text-indigo-600 font-black text-3xl tracking-widest">穿越雲端同步中...</p>
+            <div class="inline-block p-6 bg-white rounded-full shadow-2xl mb-6 pulse-soft">
+                <i class="fas fa-gamepad text-6xl text-purple-600"></i>
+            </div>
+            <p class="text-purple-600 font-black text-3xl tracking-widest">LOADING MISSION DATA...</p>
         </div>
     </div>
 
-    <div class="max-w-7xl mx-auto">
-        <!-- 頂部標題區 -->
+    <div class="max-w-[1500px] mx-auto">
+        
+        <!-- Header -->
         <header class="text-center mb-16">
-            <div class="inline-block px-8 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-full text-sm font-black mb-6 tracking-[0.3em] shadow-lg pulse-soft uppercase">
-                AI Discovery Adventure 🌟
+            <div class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full text-xs font-black mb-6 text-white tracking-[0.3em] shadow-lg uppercase">
+                <i class="fas fa-bolt mr-2"></i> Level Up Your Workflow
             </div>
-            <h1 class="text-6xl font-black text-slate-800 mb-4 tracking-tight">🚀 AI 創新探險日誌</h1>
-            <p class="text-slate-600 text-2xl font-medium max-w-3xl mx-auto leading-relaxed">
-                這裡是我們的「創意孵化器」！讓我們一起玩轉 AI，優化流程。
-                <span class="block text-indigo-600 mt-4 font-black text-3xl">✨ 讓工作更輕鬆，成就感滿滿，讓未來超乎想像！ ✨</span>
+            <h1 class="text-7xl font-black text-slate-900 mb-6 tracking-tighter italic">
+                AI <span class="text-purple-600">INNOVATION</span> QUEST
+            </h1>
+            <p class="text-slate-500 text-2xl font-bold">
+                這不是工作，這是一場優化世界的冒險！
             </p>
         </header>
 
-        <!-- 獎勵與激勵文字 -->
-        <div class="bg-indigo-600 rounded-[3rem] p-12 mb-16 shadow-2xl relative overflow-hidden text-white border-4 border-white/20">
-            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                <div class="text-center md:text-left">
-                    <h3 class="text-3xl font-black mb-4 flex items-center justify-center md:justify-start">
-                        <i class="fas fa-gift mr-4 text-yellow-400"></i> 冒險者的成長補給
-                    </h3>
-                    <p class="opacity-95 font-bold text-xl leading-relaxed">所有的進步與創意，都是部門成長的動力。<br>我們將參考這些日誌，作為未來獎金發放與職位調升的重要里程碑！</p>
-                </div>
-                <div class="flex-shrink-0 bg-white/10 p-8 rounded-3xl border border-white/20 text-center">
-                    <p class="text-sm uppercase tracking-widest opacity-70 mb-1">Current Mission</p>
-                    <p class="text-3xl font-black italic text-yellow-300">Efficiency Boost!</p>
+        <!-- 激勵公告區 (遊戲任務風格) -->
+        <div class="bg-white rounded-[3.5rem] p-1 shadow-2xl mb-20 overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-[3.3rem] p-12 relative text-white">
+                <div class="relative z-10 flex flex-col xl:flex-row items-center justify-between gap-10">
+                    <div class="text-center xl:text-left">
+                        <h3 class="text-4xl font-black mb-4 flex items-center justify-center xl:justify-start tracking-tight">
+                            <i class="fas fa-trophy mr-5 text-yellow-300"></i> 傳奇冒險者的榮耀
+                        </h3>
+                        <p class="opacity-90 font-bold text-2xl leading-relaxed">
+                            每一份創意點子都是經驗值，優化流程將解鎖隱藏獎勵！<br>
+                            我們將依據「英雄榜」的表現，作為未來加薪與獎金發放的關鍵依據。
+                        </p>
+                    </div>
+                    <div class="flex-shrink-0 bg-yellow-400 text-purple-900 p-8 rounded-[2.5rem] text-center transform -rotate-3 shadow-xl border-4 border-white">
+                        <p class="text-xs uppercase font-black tracking-widest mb-1">Current Event</p>
+                        <p class="text-4xl font-black italic tracking-tighter">DOUBLE EXP</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-12">
-            <!-- 側邊欄：登記表單 -->
-            <div class="lg:col-span-1">
-                <div class="adventure-card p-10 shadow-2xl border border-white/50 sticky top-10">
-                    <h2 class="text-2xl font-black mb-8 text-indigo-600 flex items-center">
-                        <i class="fas fa-magic mr-3"></i> 啟動點子
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            
+            <!-- Sidebar -->
+            <div class="lg:col-span-3">
+                <div class="adventure-card p-10 sticky top-8 border-b-[10px] border-b-purple-100">
+                    <h2 class="text-3xl font-black mb-10 text-purple-600 flex items-center italic">
+                        <i class="fas fa-plus-square mr-4 text-pink-500"></i> NEW QUEST
                     </h2>
-                    <form id="aiForm" class="space-y-6">
+                    
+                    <form id="aiForm" class="space-y-8">
                         <div>
-                            <label class="block text-xs font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">冒險者姓名</label>
-                            <input type="text" id="name" required placeholder="您的姓名" class="w-full px-5 py-4 bg-white border-2 border-slate-100 focus:border-indigo-400 rounded-3xl outline-none transition font-bold shadow-inner text-lg">
+                            <label class="block text-xs font-black text-slate-400 uppercase mb-3 ml-1 tracking-widest">冒險者稱號</label>
+                            <input type="text" id="name" required placeholder="您的名字" class="w-full px-6 py-5 bg-white font-bold text-xl">
                         </div>
                         <div>
-                            <label class="block text-xs font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">探險主題</label>
-                            <input type="text" id="topic" required placeholder="想優化的內容" class="w-full px-5 py-4 bg-white border-2 border-slate-100 focus:border-indigo-400 rounded-3xl outline-none transition font-bold shadow-inner text-lg">
+                            <label class="block text-xs font-black text-slate-400 uppercase mb-3 ml-1 tracking-widest">任務主題</label>
+                            <input type="text" id="topic" required placeholder="想進化的點子" class="w-full px-6 py-5 bg-white font-bold text-xl">
                         </div>
-                        <div class="grid grid-cols-1 gap-4">
+                        <div class="grid grid-cols-1 gap-6">
                             <div>
-                                <label class="block text-xs font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">起始日</label>
-                                <input type="date" id="startDate" required class="w-full px-5 py-3 bg-white border-2 border-slate-100 focus:border-indigo-400 rounded-2xl outline-none transition text-base font-bold">
+                                <label class="block text-xs font-black text-slate-400 uppercase mb-3 ml-1 tracking-widest">冒險起點</label>
+                                <input type="date" id="startDate" required class="w-full px-6 py-4 bg-white font-bold">
                             </div>
                             <div>
-                                <label class="block text-xs font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest">預計抵達日</label>
-                                <input type="date" id="deadline" required class="w-full px-5 py-3 bg-white border-2 border-slate-100 focus:border-indigo-400 rounded-2xl outline-none transition text-base font-bold">
+                                <label class="block text-xs font-black text-slate-400 uppercase mb-3 ml-1 tracking-widest">預計抵達日</label>
+                                <input type="date" id="deadline" required class="w-full px-6 py-4 bg-white font-bold">
                             </div>
                         </div>
-                        <button type="submit" class="w-full bg-gradient-to-br from-indigo-600 to-purple-700 hover:from-indigo-500 hover:to-purple-600 text-white font-black py-5 rounded-2xl shadow-xl transition transform active:scale-95 mt-4 tracking-widest text-xl">
-                            登錄探險 🚀
+                        <button type="submit" class="btn-game w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-black py-6 rounded-3xl shadow-lg transition active:scale-95 mt-6 tracking-[0.2em] text-2xl uppercase">
+                            Start Quest
                         </button>
                     </form>
-                    <div class="mt-10 pt-8 border-t border-slate-200">
-                        <button onclick="toggleAdminView()" id="adminBtn" class="w-full py-4 text-xs font-black text-slate-400 hover:text-indigo-600 tracking-[0.2em] transition border-2 border-dashed border-slate-200 rounded-2xl uppercase">
-                            <i class="fas fa-shield-alt mr-2"></i> 管理員視角
+                    
+                    <div class="mt-12 pt-8 border-t border-slate-100">
+                        <button onclick="toggleAdminView()" id="adminBtn" class="w-full py-4 text-xs font-black text-slate-400 hover:text-purple-600 transition border-2 border-dashed border-slate-200 rounded-2xl uppercase tracking-widest">
+                            Admin Mode
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- 主顯示區 -->
-            <div class="lg:col-span-3 space-y-20">
-                <!-- 看板區 -->
+            <!-- Main Area -->
+            <div class="lg:col-span-9 space-y-20">
+                
+                <!-- Kanban Section -->
                 <div>
-                    <div class="flex justify-between items-end mb-10 px-4">
-                        <h2 class="text-4xl font-black text-slate-800 tracking-tight flex items-center">
-                            <i class="fas fa-map-marked-alt mr-5 text-indigo-500"></i> 探險進度看板
+                    <div class="flex justify-between items-end mb-10 px-6">
+                        <h2 class="text-5xl font-black text-slate-900 tracking-tighter italic flex items-center">
+                            <i class="fas fa-layer-group mr-6 text-purple-500"></i> 當前任務狀態
                         </h2>
-                        <div class="text-base font-black text-slate-400 bg-white px-5 py-2 rounded-full shadow-md border border-slate-100 uppercase tracking-widest">
-                            Missions: <span id="projectCount" class="text-indigo-600">0</span>
+                        <div class="text-xl font-black text-white bg-slate-900 px-8 py-3 rounded-full shadow-xl uppercase tracking-widest transform rotate-2">
+                            Missions: <span id="projectCount" class="text-cyan-400 ml-2">0</span>
                         </div>
                     </div>
-                    <div id="projectList" class="space-y-8">
-                        <div id="statusMessage" class="text-center py-20 text-slate-400 italic text-2xl bg-white/50 rounded-[3rem] border-2 border-dashed">
-                            正在載入雲端日誌...
+                    
+                    <div id="projectList" class="space-y-6">
+                        <div id="statusMessage" class="text-center py-24 text-slate-400 italic text-3xl bg-white/50 rounded-[3rem] border-4 border-dashed border-slate-200">
+                            正在讀取冒險紀錄...
                         </div>
                     </div>
                 </div>
 
-                <!-- 榜單區 -->
-                <div class="pt-10">
-                    <h2 class="text-4xl font-black text-slate-800 mb-8 flex items-center tracking-tight px-4">
-                        <i class="fas fa-medal mr-5 text-yellow-500"></i> 夥伴探險戰力榜
+                <!-- Leaderboard Section -->
+                <div class="pt-16 border-t-4 border-slate-200">
+                    <h2 class="text-5xl font-black text-slate-900 mb-12 flex items-center tracking-tighter italic px-6">
+                        <i class="fas fa-crown mr-6 text-yellow-400"></i> 夥伴探險戰力榜
                     </h2>
-                    <div class="adventure-card shadow-2xl border-4 border-white overflow-hidden">
+                    <div class="adventure-card shadow-2xl border-4 border-white overflow-hidden bg-white">
                         <div class="overflow-x-auto no-scrollbar">
                             <table class="w-full text-left border-collapse summary-table">
-                                <thead class="bg-indigo-600 text-white uppercase font-black">
+                                <thead class="tracking-widest">
                                     <tr>
-                                        <th class="px-10 py-10">英雄同仁</th>
-                                        <th class="px-6 py-10 text-center">專案數</th>
-                                        <th class="px-6 py-10 text-center text-nowrap">奧援次數</th>
-                                        <th class="px-6 py-10 text-center">平均邏輯</th>
-                                        <th class="px-6 py-10 text-center">平均實用</th>
-                                        <th class="px-6 py-10 text-center text-yellow-300">平均創新</th>
-                                        <th class="px-10 py-10 text-right">成就總分</th>
+                                        <th class="px-10 py-10">英雄英雄</th>
+                                        <th class="px-6 py-10 text-center">探險次加成</th>
+                                        <th class="px-6 py-10 text-center text-nowrap">奧援次</th>
+                                        <th class="px-6 py-10 text-center">邏輯</th>
+                                        <th class="px-6 py-10 text-center">實用</th>
+                                        <th class="px-6 py-10 text-center text-yellow-300">創新</th>
+                                        <th class="px-12 py-10 text-right">戰力總值</th>
                                     </tr>
                                 </thead>
-                                <tbody id="summaryTableBody" class="font-bold text-slate-700"></tbody>
+                                <tbody id="summaryTableBody" class="font-bold text-slate-800">
+                                    <!-- JS 自動產生 -->
+                                </tbody>
                             </table>
                         </div>
                     </div>
-                    <p class="text-center text-slate-500 text-xl mt-12 font-bold italic">
-                        <i class="fas fa-info-circle mr-3"></i> 戰力榜數據根據奧援評價實時同步，讓我們一起突破自我！
-                    </p>
+                    <div class="mt-8 px-10 py-6 bg-purple-50 rounded-[2.5rem] border-4 border-purple-100 flex items-center">
+                        <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center mr-6 text-white shrink-0 shadow-lg">
+                            <i class="fas fa-info"></i>
+                        </div>
+                        <p class="text-purple-900 text-lg font-bold leading-relaxed">
+                            <span class="text-purple-600 font-black">激勵機制：</span> 
+                            戰力總值 = 平均評價分數 + (探險次數 × 0.2)。參與越頻繁，等級越高！
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 奧援評分彈窗 -->
-    <div id="ratingModal" class="fixed inset-0 bg-slate-900/70 hidden flex items-center justify-center z-50 p-6 backdrop-blur-md">
-        <div class="bg-white rounded-[4rem] p-12 max-w-lg w-full shadow-2xl border-8 border-white overflow-y-auto max-h-[90vh]">
-            <div class="text-center w-full mb-10">
-                <div class="text-8xl mb-6">💖</div>
-                <h3 class="text-4xl font-black text-slate-800 mb-4">傳送奧援能量</h3>
-                <p id="ratingProjectName" class="text-indigo-600 font-black text-2xl"></p>
+    <!-- Rating Modal -->
+    <div id="ratingModal" class="fixed inset-0 bg-purple-900/80 hidden flex items-center justify-center z-50 p-6 backdrop-blur-xl">
+        <div class="bg-white rounded-[4rem] p-12 max-w-2xl w-full shadow-[0_0_80px_rgba(255,77,145,0.4)] border-8 border-white overflow-y-auto max-h-[90vh]">
+            <div class="text-center mb-10">
+                <div class="text-8xl mb-6 pulse-soft">✨</div>
+                <h3 class="text-5xl font-black text-slate-900 mb-4 tracking-tight">傳送奧援能量</h3>
+                <p id="ratingProjectName" class="text-purple-600 font-black text-2xl italic"></p>
             </div>
+            
             <div class="space-y-8">
-                <input type="text" id="voterName" placeholder="您的稱號" class="w-full bg-slate-50 border-4 border-slate-100 rounded-3xl px-8 py-5 outline-none focus:border-indigo-400 transition font-black text-2xl text-slate-700 shadow-inner text-center">
-                <div class="space-y-10 bg-indigo-50/50 p-10 rounded-[3rem] border-2 border-indigo-100">
+                <input type="text" id="voterName" placeholder="您的英雄稱號" class="w-full bg-slate-50 border-4 border-slate-100 rounded-[2rem] px-8 py-6 outline-none focus:border-purple-400 transition font-black text-3xl text-slate-800 text-center shadow-inner">
+                
+                <div class="space-y-10 bg-purple-50 p-10 rounded-[3rem] border-4 border-white shadow-inner">
                     <div class="rating-row" data-category="logic">
-                        <label class="flex justify-between text-base font-black text-slate-500 uppercase tracking-widest mb-2">底層邏輯 <span class="score-display text-indigo-600 font-black text-4xl">0</span></label>
-                        <div class="flex justify-between text-6xl star-row">
+                        <label class="flex justify-between text-xl font-black text-purple-400 mb-2 uppercase tracking-widest">底層邏輯 <span class="score-display text-purple-600 font-black text-5xl">0</span></label>
+                        <div class="flex justify-between text-7xl star-row">
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="1"></i>
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="2"></i>
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="3"></i>
@@ -176,8 +252,8 @@
                         </div>
                     </div>
                     <div class="rating-row" data-category="utility">
-                        <label class="flex justify-between text-base font-black text-slate-500 uppercase tracking-widest mb-2">辦公實用性 <span class="score-display text-emerald-500 font-black text-4xl">0</span></label>
-                        <div class="flex justify-between text-6xl star-row">
+                        <label class="flex justify-between text-xl font-black text-purple-400 mb-2 uppercase tracking-widest">辦公實用性 <span class="score-display text-emerald-500 font-black text-5xl">0</span></label>
+                        <div class="flex justify-between text-7xl star-row">
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="1"></i>
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="2"></i>
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="3"></i>
@@ -186,8 +262,8 @@
                         </div>
                     </div>
                     <div class="rating-row" data-category="innovation">
-                        <label class="flex justify-between text-base font-black text-slate-500 uppercase tracking-widest mb-2">技術創新性 <span class="score-display text-orange-500 font-black text-4xl">0</span></label>
-                        <div class="flex justify-between text-6xl star-row">
+                        <label class="flex justify-between text-xl font-black text-purple-400 mb-2 uppercase tracking-widest">技術創新性 <span class="score-display text-orange-500 font-black text-5xl">0</span></label>
+                        <div class="flex justify-between text-7xl star-row">
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="1"></i>
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="2"></i>
                             <i class="far fa-star cursor-pointer transition-transform hover:scale-110" data-val="3"></i>
@@ -197,18 +273,18 @@
                     </div>
                 </div>
             </div>
-            <div class="flex gap-6 mt-12">
+            
+            <div class="flex gap-6 mt-16">
                 <button onclick="closeRatingModal()" class="flex-1 px-4 py-6 bg-slate-100 rounded-3xl font-black text-slate-400 text-3xl transition hover:bg-slate-200">稍後</button>
-                <button onclick="submitMultiVote()" class="flex-2 px-10 py-6 bg-indigo-600 text-white rounded-3xl font-black shadow-2xl text-3xl transition active:scale-95">送出奧援 ⚡</button>
+                <button onclick="submitMultiVote()" class="btn-game flex-2 px-10 py-6 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-3xl font-black shadow-xl text-3xl transition active:scale-95 uppercase">Send Energy ⚡</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast 提示 -->
-    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 px-16 py-8 bg-slate-900 text-white rounded-[3rem] shadow-2xl opacity-0 transition-all duration-500 pointer-events-none z-[110] text-2xl font-black tracking-widest uppercase">Success!</div>
+    <!-- Toast Message -->
+    <div id="toast" class="fixed bottom-12 left-1/2 transform -translate-x-1/2 px-12 py-6 bg-slate-900 text-white rounded-full shadow-2xl opacity-0 transition-all duration-500 pointer-events-none z-[110] text-2xl font-black tracking-widest uppercase">Action Success!</div>
 
     <script>
-        // 【核心設定】請確保此網址與您的 GAS URL 一致
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbwW-rvZr0lOzoJFfQc_t6ML_Ogx80gKEMZ_6C57iflWFiov5KeSQUwIwHtMlu2AlAd9/exec';
         const ADMIN_PWD = '8888'; 
 
@@ -228,14 +304,12 @@
         async function fetchData() {
             showLoading(true);
             try {
-                // 增加時間戳參數避免快取
                 const response = await fetch(`${GAS_URL}?t=${Date.now()}`, { cache: "no-store" });
-                if (!response.ok) throw new Error('API No Response');
                 globalData = await response.json();
                 updateUI();
             } catch (e) {
                 console.error(e);
-                showToast("連線雲端失敗");
+                showToast("雲端伺服器離線中");
             }
             showLoading(false);
         }
@@ -243,18 +317,16 @@
         async function cloudAction(params) {
             showLoading(true);
             try {
-                // 使用 POST 同步資料
                 await fetch(GAS_URL, {
                     method: 'POST',
                     mode: 'no-cors',
                     body: JSON.stringify(params)
                 });
-                showToast("同步傳送中...");
-                // 延遲刷新，確保雲端完成寫入
+                showToast("SYNCING...");
                 setTimeout(fetchData, 2500); 
             } catch (e) {
                 console.error(e);
-                showToast("同步失敗");
+                showToast("雲端傳輸失敗");
                 showLoading(false);
             }
         }
@@ -265,10 +337,21 @@
             renderSummary(globalData);
         }
 
+        function getRemainingDaysLabel(deadlineStr) {
+            if (!deadlineStr) return "";
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const deadline = new Date(deadlineStr); deadline.setHours(0, 0, 0, 0);
+            const diffDays = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < 0) return `<span class="bg-red-500 text-white px-4 py-1.5 rounded-full font-black ml-4 shadow-sm border-2 border-white">TIME OVER: ${Math.abs(diffDays)}D</span>`;
+            if (diffDays === 0) return `<span class="bg-yellow-400 text-purple-900 px-4 py-1.5 rounded-full font-black ml-4 shadow-sm border-2 border-white pulse-soft">FINAL DAY!</span>`;
+            return `<span class="bg-cyan-400 text-purple-900 px-4 py-1.5 rounded-full font-black ml-4 shadow-sm border-2 border-white">REST: ${diffDays}D</span>`;
+        }
+
         function renderProjects(items) {
             const list = document.getElementById('projectList');
             if (items.length === 0) {
-                list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-2xl bg-white/50 rounded-[3rem] border-2 border-dashed">目前尚未有任何探險日誌。</div>';
+                list.innerHTML = '<div class="text-center py-24 text-slate-400 italic text-3xl bg-white/30 rounded-[3rem] border-4 border-dashed">等待勇者發起挑戰...</div>';
                 return;
             }
             list.innerHTML = [...items].reverse().map(item => {
@@ -282,48 +365,58 @@
                         sc.innovation += Number(item.votes[n].innovation || 0);
                     });
                     sc.avg = ((sc.logic + sc.utility + sc.innovation) / (vCount * 3)).toFixed(1);
-                } else { sc.avg = '—'; }
+                } else { sc.avg = '0.0'; }
 
-                const sText = (item.status || "").toString();
-                const isCompleted = sText.includes('達成') || sText.includes('完成');
+                const isCompleted = (item.status || "").includes('達成') || (item.status || "").includes('完成');
 
                 return `
-                <div class="adventure-card p-10 shadow-xl border-4 border-white transition-all hover:shadow-2xl hover:bg-white group">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
-                        <div class="flex-1 w-full">
-                            <div class="flex flex-wrap items-center gap-4 mb-4">
-                                <span class="px-5 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-black border-2 border-indigo-200 uppercase tracking-widest">Mission Log</span>
-                                <span class="text-lg text-slate-500 font-bold bg-slate-50 px-4 py-1 rounded-full border border-slate-200">
-                                    <i class="far fa-compass mr-2 text-indigo-500"></i>${formatDate(item.startdate)} ➔ <span class="text-orange-600 font-black">抵達: ${formatDate(item.deadline)}</span>
+                <div class="adventure-card p-10 border-2 border-white group">
+                    <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-8">
+                        <div class="flex-1 w-full space-y-6">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="px-4 py-1 bg-purple-600 text-white rounded-full text-[10px] font-black tracking-widest uppercase">Mission #${item.id.toString().slice(-4)}</span>
+                                <span class="text-lg text-slate-500 font-black bg-white/80 px-5 py-2 rounded-full border border-slate-100 shadow-sm flex items-center">
+                                    <i class="far fa-clock mr-3 text-purple-500"></i>${formatDate(item.startdate)} ➔ ${formatDate(item.deadline)}
+                                    ${getRemainingDaysLabel(item.deadline)}
                                 </span>
                             </div>
-                            <h3 class="kanban-title text-slate-800 leading-tight group-hover:text-indigo-600 transition-colors mb-4">${item.topic}</h3>
-                            <div class="flex flex-wrap items-center gap-10">
-                                <span class="text-indigo-600 font-black kanban-user-text italic flex items-center">
-                                    <div class="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center mr-3 text-2xl border-2 border-white shadow-sm"><i class="fas fa-user-ninja"></i></div>
+                            <h3 class="text-4xl font-black text-slate-800 leading-tight group-hover:text-purple-600 transition-colors italic uppercase tracking-tighter">${item.topic}</h3>
+                            <div class="flex flex-wrap items-center gap-12">
+                                <span class="hero-name-font text-purple-600 italic flex items-center bg-white px-6 py-2 rounded-2xl shadow-sm border-2 border-purple-50">
+                                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center mr-4 text-white shadow-lg"><i class="fas fa-user-ninja text-xl"></i></div>
                                     @${item.name}
                                 </span>
-                                <div class="flex items-center gap-4 bg-slate-50/80 px-6 py-2 rounded-[2rem] border-2 border-white shadow-inner">
-                                    <div class="flex items-center text-amber-500 font-black text-2xl"><i class="fas fa-bolt mr-2 text-yellow-500 text-3xl"></i>成就 ${sc.avg}</div>
+                                <div class="flex items-center gap-10 bg-slate-900 text-white px-8 py-3 rounded-[2rem] border-4 border-slate-800 shadow-xl">
+                                    <div class="flex items-center hero-score-font tracking-tighter"><i class="fas fa-star mr-4 text-yellow-400 text-3xl"></i>EXP: <span class="text-cyan-400 ml-2">${sc.avg}</span></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex flex-wrap items-center gap-4 w-full md:w-auto justify-end">
-                            <span class="px-10 py-5 rounded-3xl text-xl font-black tracking-widest border-b-8 shadow-lg transition-all ${getStatusClass(item.status)}">${item.status || '🚀 正在起飛'}</span>
+                        
+                        <div class="flex flex-row items-center gap-6 w-full xl:w-auto justify-end pt-6 xl:pt-0 border-t xl:border-t-0 border-slate-100">
+                            <span class="px-10 py-5 rounded-[2rem] text-xl font-black tracking-widest border-b-[6px] shadow-lg transition-all ${getStatusClass(item.status)}">${item.status || '🚀 正在起飛'}</span>
                             <div class="flex gap-4">
-                                <button onclick="toggleStatus('${item.id}')" title="切換進度" class="p-6 bg-white text-slate-400 hover:text-indigo-600 rounded-[2rem] transition shadow-md border-2 border-slate-100 active:scale-90"><i class="fas fa-sync-alt text-3xl"></i></button>
-                                ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-indigo-600 text-white px-10 py-5 rounded-[2rem] font-black text-xl tracking-[0.1em] shadow-xl hover:bg-indigo-700 active:scale-95 pulse-soft">奧援</button>` : ''}
-                                <button onclick="deleteProject('${item.id}')" class="p-6 text-slate-100 hover:text-red-500 transition"><i class="far fa-trash-alt text-3xl"></i></button>
+                                <button onclick="toggleStatus('${item.id}')" title="進度切換" class="btn-game p-6 bg-white text-slate-400 hover:text-purple-600 rounded-[2rem] transition shadow-md border-2 border-slate-100 active:scale-90"><i class="fas fa-sync-alt text-4xl"></i></button>
+                                ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="btn-game bg-gradient-to-r from-pink-500 to-purple-600 text-white px-10 py-5 rounded-[2rem] font-black text-2xl tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 pulse-soft">奧援 ⚡</button>` : ''}
+                                <button onclick="deleteProject('${item.id}')" class="btn-game p-6 bg-white text-slate-200 hover:text-red-500 rounded-[2rem] transition shadow-md border-2 border-slate-100"><i class="far fa-trash-alt text-4xl"></i></button>
                             </div>
                         </div>
                     </div>
-                    <!-- 管理員明細 -->
-                    <div class="${isAdminView ? 'block' : 'hidden'} mt-10 pt-8 border-t-4 border-dashed border-slate-100 animate-in fade-in">
-                        <p class="w-full text-lg font-black text-slate-400 uppercase tracking-[0.3em] mb-4">奧援戰歷 (管理員模式)</p>
-                        <div class="flex flex-wrap gap-4">
-                            ${vCount > 0 ? voters.map(v => `<div class="bg-white px-6 py-3 rounded-2xl border-2 border-slate-100 shadow-sm text-lg font-black">
-                                <span class="text-indigo-600 text-xl mr-2">${v}</span>: L:${item.votes[v].logic} U:${item.votes[v].utility} I:${item.votes[v].innovation}
-                            </div>`).join('') : '<p class="text-slate-400 italic text-xl">目前尚無數據。</p>'}
+                    
+                    <!-- Admin Panel Log -->
+                    <div class="${isAdminView ? 'block' : 'hidden'} mt-10 pt-10 border-t-4 border-dashed border-slate-100 animate-in fade-in">
+                        <p class="w-full text-lg font-black text-slate-400 uppercase tracking-[0.4em] mb-6">奧援歷史日誌 (ADMIN ONLY)</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
+                            ${vCount > 0 ? voters.map(v => `<div class="bg-white p-6 rounded-[2rem] border-4 border-slate-50 shadow-sm flex flex-col gap-3">
+                                <div class="flex justify-between items-center border-b-2 border-slate-50 pb-3">
+                                    <span class="text-purple-600 text-2xl font-black italic">@${v}</span>
+                                    <span class="text-slate-300 text-sm font-mono">${item.votes[v].time || ''}</span>
+                                </div>
+                                <div class="flex gap-6 text-lg font-black text-slate-400 italic">
+                                    <span class="bg-purple-50 px-3 py-1 rounded-xl">L: ${item.votes[v].logic}</span>
+                                    <span class="bg-emerald-50 px-3 py-1 rounded-xl">U: ${item.votes[v].utility}</span>
+                                    <span class="bg-orange-50 px-3 py-1 rounded-xl">I: ${item.votes[v].innovation}</span>
+                                </div>
+                            </div>`).join('') : '<p class="text-slate-400 italic text-2xl">尚無能量傳送紀錄。</p>'}
                         </div>
                     </div>
                 </div>`;
@@ -333,7 +426,7 @@
         function renderSummary(items) {
             const stats = {};
             items.forEach(item => {
-                const n = item.name || "Unknown";
+                const n = item.name || "勇者";
                 if (!stats[n]) stats[n] = { total: 0, logic: 0, utility: 0, innovation: 0, vCount: 0 };
                 stats[n].total++;
                 const votes = Object.values(item.votes || {});
@@ -346,10 +439,14 @@
                     });
                 }
             });
+            
             const sorted = Object.keys(stats).sort((a,b) => {
-                const sB = (stats[b].logic + stats[b].utility + stats[b].innovation) / (Math.max(1, stats[b].vCount) * 3);
-                const sA = (stats[a].logic + stats[a].utility + stats[a].innovation) / (Math.max(1, stats[a].vCount) * 3);
-                return sB - sA;
+                const getPower = (name) => {
+                    const s = stats[name];
+                    const avg = s.vCount > 0 ? (s.logic + s.utility + s.innovation) / (s.vCount * 3) : 0;
+                    return avg + (s.total * 0.2);
+                };
+                return getPower(b) - getPower(a);
             });
 
             document.getElementById('summaryTableBody').innerHTML = sorted.map((name, idx) => {
@@ -357,33 +454,34 @@
                 const avgL = s.vCount > 0 ? (s.logic / s.vCount).toFixed(1) : '0.0';
                 const avgU = s.vCount > 0 ? (s.utility / s.vCount).toFixed(1) : '0.0';
                 const avgI = s.vCount > 0 ? (s.innovation / s.vCount).toFixed(1) : '0.0';
-                const totalAvg = ((parseFloat(avgL) + parseFloat(avgU) + parseFloat(avgI)) / 3).toFixed(1);
+                const avgBase = s.vCount > 0 ? (parseFloat(avgL) + parseFloat(avgU) + parseFloat(avgI)) / 3 : 0;
+                const totalPower = (avgBase + (s.total * 0.2)).toFixed(1);
+                
                 const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '👤';
+
                 return `
-                <tr class="border-t-4 border-slate-100 hover:bg-indigo-50/50 transition group">
-                    <td class="px-10 py-12 font-black text-slate-800 text-3xl">
-                        <span class="mr-6 inline-block transform group-hover:rotate-12 transition-transform">${medal}</span>@${name}
+                <tr class="hover:bg-purple-50/50 transition-colors group">
+                    <td class="px-10 py-12 font-black text-slate-800 text-4xl name-cell italic">
+                        <span class="mr-8 inline-block transform group-hover:rotate-12 transition-transform">${medal}</span>@${name}
                     </td>
-                    <td class="px-6 py-12 text-center text-slate-400 text-4xl font-mono">${s.total}</td>
+                    <td class="px-6 py-12 text-center text-purple-500 font-black text-4xl italic">+${(s.total * 0.2).toFixed(1)}</td>
                     <td class="px-6 py-12 text-center text-slate-400 font-black text-4xl font-mono">${s.vCount}</td>
-                    <td class="px-6 py-12 text-center font-bold text-slate-400 italic text-2xl">${avgL}</td>
-                    <td class="px-6 py-12 text-center font-bold text-slate-400 italic text-2xl">${avgU}</td>
-                    <td class="px-6 py-12 text-center font-bold text-orange-400 italic text-2xl">${avgI}</td>
-                    <td class="px-10 py-12 text-right">
-                        <span class="bg-indigo-600 text-white px-10 py-6 rounded-[2.5rem] font-black shadow-xl ring-[12px] ring-indigo-50 achievement-score font-mono">${totalAvg}</span>
+                    <td class="px-6 py-12 text-center font-bold text-slate-400 italic text-3xl">${avgL}</td>
+                    <td class="px-6 py-12 text-center font-bold text-slate-400 italic text-3xl">${avgU}</td>
+                    <td class="px-6 py-12 text-center font-bold text-orange-400 italic text-3xl">${avgI}</td>
+                    <td class="px-12 py-12 text-right">
+                        <span class="achievement-score font-mono shadow-sm bg-white px-8 py-4 rounded-[3rem] border-4 border-purple-50 italic">${totalPower}</span>
                     </td>
                 </tr>`;
             }).join('');
         }
 
-        // --- 功能模組 ---
+        // --- Core Logic ---
         document.getElementById('aiForm').onsubmit = async (e) => {
             e.preventDefault();
-            // 使用時間戳加隨機後綴，防止多人碰撞
-            const uniqueId = Date.now().toString() + Math.random().toString(36).substring(2, 7);
+            const uniqueId = Date.now().toString() + Math.random().toString(36).substring(2, 5);
             const newProject = {
-                action: 'create', 
-                id: uniqueId,
+                action: 'create', id: uniqueId,
                 name: document.getElementById('name').value.trim(),
                 topic: document.getElementById('topic').value.trim(),
                 startDate: document.getElementById('startDate').value,
@@ -402,26 +500,20 @@
             const states = ['🚀 正在起飛', '🔍 實驗室調校中', '✨ 圓滿達成目標'];
             let curIdx = 0;
             const curText = (item.status || "").toString();
-            
             if (curText.includes('調校')) curIdx = 1;
             else if (curText.includes('達成') || curText.includes('完成')) curIdx = 2;
             
             const nStatus = states[(curIdx + 1) % 3];
-            
-            // 樂觀更新：立即更新本地 UI
             item.status = nStatus;
             updateUI(); 
-
             await cloudAction({ action: 'updateStatus', id: targetId, status: nStatus });
         }
 
         async function submitMultiVote() {
             const voter = document.getElementById('voterName').value.trim();
-            if (!voter || Object.values(selectedScores).some(v => v === 0)) return showToast("每個評價都要打分喔！");
-            
+            if (!voter || Object.values(selectedScores).some(v => v === 0)) return showToast("所有能量格都要填滿喔！");
             const item = globalData.find(p => p.id.toString() === currentRatingProjectId.toString());
-            if (item.name === voter) return showToast("不能給自己奧援啦！");
-            
+            if (item.name === voter) return showToast("不能給自己的任務傳送能量喔！");
             const nVotes = { ...(item.votes || {}) };
             nVotes[voter] = { ...selectedScores, time: new Date().toLocaleString() };
             item.votes = nVotes;
@@ -431,36 +523,31 @@
         }
 
         async function deleteProject(id) {
-            if (confirm("這會從雲端永久刪除嗎？")) {
-                await cloudAction({ action: 'delete', id: id.toString() });
-            }
+            if (confirm("這項冒險將從此消失，確定嗎？")) await cloudAction({ action: 'delete', id: id.toString() });
         }
 
         function toggleAdminView() {
             if (!isAdminView) {
-                const input = prompt("🔐 請輸入守門人密碼 (預設 8888):");
-                if (input !== ADMIN_PWD) {
-                    showToast("❌ 密碼錯誤");
-                    return;
-                }
+                const input = prompt("🔐 請輸入管理員解鎖密碼 (8888):");
+                if (input !== ADMIN_PWD) return showToast("ACCESS DENIED");
             }
             isAdminView = !isAdminView;
             const btn = document.getElementById('adminBtn');
-            btn.innerHTML = isAdminView ? `<i class="fas fa-lock-open mr-2 text-indigo-600"></i> 管理模式: 已開啟` : `<i class="fas fa-shield-alt mr-2"></i> 管理員儀表板`;
+            btn.innerHTML = isAdminView ? `ADMIN: UNLOCKED` : `Admin Mode`;
             updateUI(); 
-            showToast(isAdminView ? "🔓 進入管理視野" : "🔒 返回夥伴視角");
+            showToast(isAdminView ? "管理視野開啟" : "管理視野關閉");
         }
 
-        // --- 通用工具 ---
         function showLoading(s) { document.getElementById('loading').style.display = s ? 'flex' : 'none'; }
         function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 3000); }
+        
         function getStatusClass(s) { 
             const t = (s || "").toString();
-            if (t.includes('達成') || t.includes('完成')) return 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-100';
-            if (t.includes('調校')) return 'bg-amber-400 text-white border-amber-500 shadow-amber-100';
-            return 'bg-indigo-600 text-white border-indigo-700 shadow-indigo-100';
+            if (t.includes('達成') || t.includes('完成')) return 'bg-emerald-500 text-white border-emerald-700 shadow-emerald-200';
+            if (t.includes('調校')) return 'bg-yellow-400 text-purple-900 border-yellow-600 shadow-yellow-100';
+            return 'bg-purple-600 text-white border-purple-800 shadow-purple-200';
         }
-        function formatDate(d) { if (!d) return ''; const date = new Date(d); if (isNaN(date.getTime())) return d; return `${date.getMonth()+1}/${date.getDate()}`; }
+        function formatDate(d) { if (!d) return ''; const date = new Date(d); return isNaN(date.getTime()) ? d : `${date.getMonth()+1}/${date.getDate()}`; }
         function openRatingModal(id, title) {
             currentRatingProjectId = id; selectedScores = { logic: 0, utility: 0, innovation: 0 };
             document.getElementById('ratingProjectName').textContent = title;
