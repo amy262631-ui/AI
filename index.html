@@ -24,7 +24,6 @@
             color: #2d3748;
         }
 
-        /* 遊戲質感卡片 */
         .adventure-card { 
             background: rgba(255, 255, 255, 0.9); 
             backdrop-filter: blur(12px); 
@@ -57,7 +56,6 @@
         
         .loading-overlay { background: rgba(240, 242, 249, 0.9); display: none; }
 
-        /* 榜單極大化樣式 */
         .summary-table th { font-size: 1rem; background: var(--game-purple); color: white; padding: 1.2rem; border: none; white-space: nowrap; }
         @media (min-width: 768px) { .summary-table th { font-size: 1.2rem; padding: 1.5rem; } }
         
@@ -73,17 +71,15 @@
         }
         @media (min-width: 768px) { .achievement-score { font-size: 3.5rem; } }
 
-        /* 名字與分數等大設定 (響應式) */
-        .hero-title-font { font-size: 1.5rem; font-weight: 900; }
-        @media (min-width: 768px) { .hero-title-font { font-size: 2rem; } }
+        /* 英雄名字與分數等大設定 */
+        .hero-title-font { font-size: 1.75rem; font-weight: 900; }
+        @media (min-width: 768px) { .hero-title-font { font-size: 2.2rem; } }
 
         .name-cell { white-space: nowrap !important; }
         
-        /* 輸入框遊戲感 */
         input { border: 2px solid #e2e8f0 !important; border-radius: 1.2rem !important; }
         input:focus { border-color: var(--game-purple) !important; box-shadow: 0 0 0 4px rgba(112, 0, 255, 0.1) !important; }
 
-        /* 朝聖連結按鈕 */
         .btn-showcase {
             background: #ffffff;
             color: var(--game-purple);
@@ -95,63 +91,36 @@
             background: var(--game-purple);
             color: white;
         }
-        .btn-showcase:active {
-            transform: translateY(5px);
-            box-shadow: 0 0px 0px var(--game-purple);
-        }
     </style>
 </head>
-<body class="min-h-screen py-6 md:py-10 px-4 md:px-6">
+<body class="min-h-screen py-6 md:py-10 px-4 md:px-6 text-slate-800">
 
-    <!-- 同步遮罩 -->
     <div id="loading" class="fixed inset-0 z-[100] flex items-center justify-center loading-overlay backdrop-blur-sm">
         <div class="text-center p-6">
             <div class="inline-block p-6 bg-white rounded-full shadow-2xl mb-6 pulse-soft">
                 <i class="fas fa-gamepad text-5xl md:text-6xl text-purple-600"></i>
             </div>
-            <p class="text-purple-600 font-black text-xl md:text-3xl tracking-widest uppercase text-nowrap">Syncing Data...</p>
+            <p class="text-purple-600 font-black text-xl md:text-3xl tracking-widest uppercase">Connecting to Cloud...</p>
         </div>
     </div>
 
     <div class="max-w-[1500px] mx-auto">
         
-        <!-- Header -->
         <header class="text-center mb-10 md:mb-16">
-            <div class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full text-[10px] md:text-xs font-black mb-6 text-white tracking-[0.2em] md:tracking-[0.3em] shadow-lg uppercase text-nowrap">
-                <i class="fas fa-bolt mr-2"></i> Level Up Your Workflow
+            <div class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full text-[10px] md:text-xs font-black mb-6 text-white tracking-[0.3em] shadow-lg uppercase">
+                <i class="fas fa-bolt mr-2"></i> Showcase Your Innovation
             </div>
-            <h1 class="text-4xl md:text-7xl font-black text-slate-900 mb-4 md:mb-6 tracking-tighter italic uppercase text-wrap text-nowrap">
+            <h1 class="text-4xl md:text-7xl font-black text-slate-900 mb-4 md:mb-6 tracking-tighter italic uppercase text-nowrap">
                 AI <span class="text-purple-600">Innovation</span> Quest
             </h1>
             <p class="text-slate-500 text-lg md:text-2xl font-bold px-4 leading-relaxed">
-                發起點子後開始開發，完成後請點擊卡片上的「成果按鈕」貼上您的作品連結！
+                完成開發後，點擊下方卡片的「連結 🔗」按鈕貼上作品網址！
             </p>
         </header>
 
-        <!-- 激勵公告區 -->
-        <div class="bg-white rounded-[2.5rem] md:rounded-[3.5rem] p-1 shadow-2xl mb-12 md:mb-20 overflow-hidden">
-            <div class="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 rounded-[2.3rem] md:rounded-[3.3rem] p-8 md:p-12 relative text-white">
-                <div class="relative z-10 flex flex-col xl:flex-row items-center justify-between gap-10">
-                    <div class="text-center xl:text-left">
-                        <h3 class="text-3xl md:text-4xl font-black mb-4 flex items-center justify-center xl:justify-start tracking-tight">
-                            <i class="fas fa-trophy mr-5 text-yellow-300"></i> 英雄榮譽榜
-                        </h3>
-                        <p class="opacity-90 font-bold text-lg md:text-2xl leading-relaxed">
-                            每一份點子都是經驗值，優化流程將解鎖隱藏獎勵！<br class="hidden md:block">
-                            戰力榜數據將作為未來加薪與獎金發放的重要依據。
-                        </p>
-                    </div>
-                    <div class="flex-shrink-0 bg-yellow-400 text-purple-900 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] text-center transform md:-rotate-3 shadow-xl border-4 border-white">
-                        <p class="text-[10px] uppercase font-black tracking-widest mb-1 text-nowrap">Current Event</p>
-                        <p class="text-2xl md:text-4xl font-black italic tracking-tighter uppercase text-nowrap">Showcase Active</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
             
-            <!-- Sidebar: Registration Form -->
+            <!-- Sidebar -->
             <div class="lg:col-span-3 order-2 lg:order-1">
                 <div class="adventure-card p-6 md:p-10 sticky top-8 border-b-[10px] border-b-purple-100 shadow-2xl">
                     <h2 class="text-2xl md:text-3xl font-black mb-8 text-purple-600 flex items-center italic">
@@ -160,88 +129,71 @@
                     
                     <form id="aiForm" class="space-y-6 md:space-y-8">
                         <div>
-                            <label class="block text-[10px] md:text-xs font-black text-slate-400 uppercase mb-3 ml-1 tracking-widest">冒險者稱號</label>
+                            <label class="block text-[10px] md:text-xs font-black text-slate-400 uppercase mb-3 tracking-widest">冒險者稱號</label>
                             <input type="text" id="name" required placeholder="您的姓名" class="w-full px-5 py-4 bg-white font-bold text-lg shadow-inner">
                         </div>
                         <div>
-                            <label class="block text-[10px] md:text-xs font-black text-slate-400 uppercase mb-3 ml-1 tracking-widest">任務主題</label>
+                            <label class="block text-[10px] md:text-xs font-black text-slate-400 uppercase mb-3 tracking-widest">任務主題</label>
                             <input type="text" id="topic" required placeholder="想進化的點子" class="w-full px-5 py-4 bg-white font-bold text-lg shadow-inner">
                         </div>
                         <div class="grid grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
                             <div>
-                                <label class="block text-[10px] md:text-xs font-black text-slate-400 uppercase mb-3 ml-1 tracking-widest">冒險起點</label>
+                                <label class="block text-[10px] md:text-xs font-black text-slate-400 uppercase mb-3 tracking-widest">啟點日</label>
                                 <input type="date" id="startDate" required class="w-full px-4 py-3 bg-white font-bold text-sm">
                             </div>
                             <div>
-                                <label class="block text-[10px] md:text-xs font-black text-slate-400 uppercase mb-3 ml-1 tracking-widest">預計抵達日</label>
+                                <label class="block text-[10px] md:text-xs font-black text-slate-400 uppercase mb-3 tracking-widest">預計抵達</label>
                                 <input type="date" id="deadline" required class="w-full px-4 py-3 bg-white font-bold text-sm">
                             </div>
                         </div>
-                        <button type="submit" class="btn-game w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-black py-5 md:py-6 rounded-2xl md:rounded-3xl shadow-lg transition active:scale-95 mt-4 tracking-[0.1em] md:tracking-[0.2em] text-xl md:text-2xl uppercase">
+                        <button type="submit" class="btn-game w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-black py-5 md:py-6 rounded-2xl md:rounded-3xl shadow-lg transition active:scale-95 mt-4 tracking-[0.2em] text-xl md:text-2xl uppercase">
                             Launch quest
                         </button>
                     </form>
-                    
-                    <div class="mt-10 pt-6 border-t border-slate-100 text-center">
-                        <button onclick="toggleAdminView()" id="adminBtn" class="py-2 px-4 text-[10px] font-black text-slate-400 hover:text-purple-600 transition border-2 border-dashed border-slate-200 rounded-xl uppercase tracking-widest">
-                            Admin Mode
-                        </button>
+                    <div class="mt-10 pt-6 border-t border-slate-100 text-center text-nowrap">
+                        <button onclick="toggleAdminView()" id="adminBtn" class="py-2 px-4 text-[10px] font-black text-slate-400 hover:text-purple-600 transition border-2 border-dashed border-slate-200 rounded-xl uppercase tracking-widest">Admin Mode</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Main Kanban Area -->
+            <!-- Main Kanban -->
             <div class="lg:col-span-9 space-y-16 md:space-y-24 order-1 lg:order-2">
-                
-                <!-- Kanban Section -->
                 <div>
                     <div class="flex flex-col sm:flex-row justify-between items-center sm:items-end mb-8 md:mb-12 px-2 md:px-6 gap-4">
                         <h2 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter italic flex items-center text-nowrap">
                             <i class="fas fa-layer-group mr-4 md:mr-6 text-purple-500"></i> 當前任務狀態
                         </h2>
-                        <div class="text-sm md:text-xl font-black text-white bg-slate-900 px-6 md:px-8 py-2 md:py-3 rounded-full shadow-xl uppercase tracking-widest transform sm:rotate-2">
+                        <div class="text-sm md:text-xl font-black text-white bg-slate-900 px-6 md:px-8 py-2 md:py-3 rounded-full shadow-xl uppercase tracking-widest transform sm:rotate-2 text-nowrap">
                             Missions: <span id="projectCount" class="text-cyan-400 ml-2">0</span>
                         </div>
                     </div>
-                    
                     <div id="projectList" class="space-y-6 md:space-y-8">
-                        <div id="statusMessage" class="text-center py-20 text-slate-400 italic text-xl md:text-3xl bg-white/50 rounded-[2rem] md:rounded-[3rem] border-4 border-dashed border-slate-200">
-                            正在讀取冒險紀錄...
-                        </div>
+                        <div id="statusMessage" class="text-center py-20 text-slate-400 italic text-xl md:text-3xl bg-white/50 rounded-[2rem] md:rounded-[3rem] border-4 border-dashed border-slate-200">正在讀取冒險日誌...</div>
                     </div>
                 </div>
 
-                <!-- Leaderboard Section -->
+                <!-- Leaderboard -->
                 <div class="pt-12 md:pt-16 border-t-4 border-slate-200">
                     <h2 class="text-3xl md:text-5xl font-black text-slate-900 mb-8 md:mb-12 flex items-center tracking-tighter italic px-2 md:px-6 text-nowrap">
-                        <i class="fas fa-crown mr-4 md:mr-6 text-yellow-400"></i> 英雄經驗榜
+                        <i class="fas fa-crown mr-4 md:mr-6 text-yellow-400"></i> 夥伴探險戰力榜
                     </h2>
                     <div class="adventure-card shadow-2xl border-4 border-white overflow-hidden bg-white">
                         <div class="overflow-x-auto no-scrollbar">
                             <table class="w-full text-left border-collapse summary-table">
                                 <thead class="tracking-widest">
                                     <tr>
-                                        <th class="px-6 md:px-10 py-6 md:py-10">英雄冒險者</th>
-                                        <th class="px-4 md:px-6 py-6 md:py-10 text-center">探險次加成</th>
-                                        <th class="px-4 md:px-6 py-6 md:py-10 text-center text-nowrap text-nowrap">奧援次</th>
+                                        <th class="px-6 md:px-10 py-6 md:py-10">英雄同仁</th>
+                                        <th class="px-4 md:px-6 py-6 md:py-10 text-center">次數加分</th>
+                                        <th class="px-4 md:px-6 py-6 md:py-10 text-center text-nowrap">奧援次</th>
                                         <th class="px-4 md:px-6 py-6 md:py-10 text-center">邏輯</th>
                                         <th class="px-4 md:px-6 py-6 md:py-10 text-center">實用</th>
                                         <th class="px-4 md:px-6 py-6 md:py-10 text-center text-yellow-300">創新</th>
                                         <th class="px-6 md:px-12 py-6 md:py-10 text-right">戰力總值</th>
                                     </tr>
                                 </thead>
-                                <tbody id="summaryTableBody" class="font-bold text-slate-800 italic bg-white"></tbody>
+                                <tbody id="summaryTableBody" class="font-bold text-slate-800 bg-white italic"></tbody>
                             </table>
                         </div>
-                    </div>
-                    <div class="mt-8 px-6 md:px-10 py-6 bg-purple-50 rounded-[2rem] md:rounded-[2.5rem] border-4 border-purple-100 flex items-center shadow-inner">
-                        <div class="w-10 h-10 md:w-12 md:h-12 bg-purple-600 rounded-full flex items-center justify-center mr-4 md:mr-6 text-white shrink-0 shadow-lg text-nowrap">
-                            <i class="fas fa-info text-sm md:text-base"></i>
-                        </div>
-                        <p class="text-purple-900 text-sm md:text-lg font-bold leading-relaxed">
-                            <span class="text-purple-600 font-black">激勵機制：</span> 
-                            戰力總值 = 平均評價分數 + (完成探險次數 × 0.2)。參與越積極，等級升越快！
-                        </p>
                     </div>
                 </div>
             </div>
@@ -250,16 +202,14 @@
 
     <!-- Rating Modal -->
     <div id="ratingModal" class="fixed inset-0 bg-purple-900/80 hidden flex items-center justify-center z-50 p-4 md:p-6 backdrop-blur-xl">
-        <div class="bg-white rounded-[3rem] md:rounded-[4rem] p-8 md:p-12 max-w-2xl w-full shadow-[0_0_80px_rgba(255,77,145,0.4)] border-8 border-white overflow-y-auto max-h-[90vh]">
-            <div class="text-center mb-8 md:mb-10">
+        <div class="bg-white rounded-[3rem] md:rounded-[4rem] p-8 md:p-12 max-w-2xl w-full shadow-2xl border-8 border-white overflow-y-auto max-h-[90vh]">
+            <div class="text-center mb-8 md:mb-10 text-nowrap">
                 <div class="text-6xl md:text-8xl mb-4 md:mb-6 pulse-soft">✨</div>
-                <h3 class="text-3xl md:text-5xl font-black text-slate-900 mb-2 md:mb-4 tracking-tight text-nowrap text-nowrap">傳送奧援能量</h3>
+                <h3 class="text-3xl md:text-5xl font-black text-slate-900 mb-2 md:mb-4 tracking-tight">傳送奧援能量</h3>
                 <p id="ratingProjectName" class="text-purple-600 font-black text-xl md:text-2xl italic"></p>
             </div>
-            
             <div class="space-y-6 md:space-y-8 text-center">
                 <input type="text" id="voterName" placeholder="您的英雄稱號" class="w-full bg-slate-50 border-4 border-slate-100 rounded-[1.5rem] md:rounded-[2rem] px-6 md:px-8 py-4 md:py-6 outline-none focus:border-purple-400 transition font-black text-xl md:text-3xl text-slate-800 text-center shadow-inner">
-                
                 <div class="space-y-8 md:space-y-10 bg-purple-50 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] border-4 border-white shadow-inner">
                     <div class="rating-row" data-category="logic">
                         <label class="flex justify-between text-lg md:text-xl font-black text-purple-400 mb-2 uppercase tracking-widest">底層邏輯 <span class="score-display text-purple-600 font-black text-3xl md:text-5xl">0</span></label>
@@ -293,8 +243,7 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="flex flex-col sm:flex-row gap-4 mt-12">
+            <div class="flex flex-col sm:flex-row gap-4 mt-12 text-nowrap">
                 <button onclick="closeRatingModal()" class="w-full sm:flex-1 px-4 py-5 bg-slate-100 rounded-2xl font-black text-slate-400 text-xl md:text-3xl transition hover:bg-slate-200">稍後</button>
                 <button onclick="submitMultiVote()" class="btn-game w-full sm:flex-2 px-8 py-5 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-2xl font-black shadow-xl text-xl md:text-3xl transition active:scale-95 uppercase">Send Energy ⚡</button>
             </div>
@@ -362,16 +311,15 @@
             const today = new Date(); today.setHours(0, 0, 0, 0);
             const deadline = new Date(deadlineStr); deadline.setHours(0, 0, 0, 0);
             const diffDays = Math.ceil((deadline - today) / (1000 * 60 * 60 * 24));
-            
-            if (diffDays < 0) return `<span class="bg-red-500 text-white px-3 py-1 rounded-full font-black text-[10px] md:text-xs shadow-sm border-2 border-white ml-2">TIME OVER: ${Math.abs(diffDays)}D</span>`;
-            if (diffDays === 0) return `<span class="bg-yellow-400 text-purple-900 px-3 py-1 rounded-full font-black text-[10px] md:text-xs shadow-sm border-2 border-white pulse-soft ml-2 uppercase">Final Day!</span>`;
-            return `<span class="bg-cyan-400 text-purple-900 px-3 py-1 rounded-full font-black text-[10px] md:text-xs shadow-sm border-2 border-white ml-2">REST: ${diffDays}D</span>`;
+            if (diffDays < 0) return `<span class="bg-red-500 text-white px-3 py-1 rounded-full font-black text-[10px] md:text-xs shadow-sm border-2 border-white ml-2 text-nowrap">TIME OVER: ${Math.abs(diffDays)}D</span>`;
+            if (diffDays === 0) return `<span class="bg-yellow-400 text-purple-900 px-3 py-1 rounded-full font-black text-[10px] md:text-xs shadow-sm border-2 border-white pulse-soft ml-2 text-nowrap uppercase">Final Day!</span>`;
+            return `<span class="bg-cyan-400 text-purple-900 px-3 py-1 rounded-full font-black text-[10px] md:text-xs shadow-sm border-2 border-white ml-2 text-nowrap">REST: ${diffDays}D</span>`;
         }
 
         function renderProjects(items) {
             const list = document.getElementById('projectList');
             if (items.length === 0) {
-                list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-2xl md:text-3xl bg-white/30 rounded-[2rem] border-4 border-dashed border-slate-200">等待勇者發起首戰...</div>';
+                list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-2xl md:text-3xl bg-white/30 rounded-[2rem] border-4 border-dashed border-slate-200">等待首位勇者...</div>';
                 return;
             }
             list.innerHTML = [...items].reverse().map(item => {
@@ -395,35 +343,33 @@
                         <div class="flex-1 w-full space-y-4 md:space-y-6 text-left">
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="px-3 py-1 bg-purple-600 text-white rounded-full text-[9px] md:text-[10px] font-black tracking-widest uppercase">Mission #${item.id.toString().slice(-4)}</span>
-                                <div class="text-xs md:text-lg text-slate-500 font-black bg-white/80 px-4 py-1.5 rounded-full border border-slate-100 shadow-sm flex flex-wrap items-center">
+                                <div class="text-xs md:text-lg text-slate-500 font-black bg-white/80 px-4 py-1.5 rounded-full border border-slate-100 shadow-sm flex flex-wrap items-center text-nowrap">
                                     <i class="far fa-clock mr-2 text-purple-500"></i>${formatDate(item.startdate)} ➔ ${formatDate(item.deadline)}
                                     ${getRemainingDaysLabel(item.deadline)}
                                 </div>
                             </div>
                             <h3 class="text-2xl md:text-4xl font-black text-slate-800 leading-tight group-hover:text-purple-600 transition-colors italic uppercase tracking-tighter">${item.topic}</h3>
-                            
                             <div class="flex flex-wrap items-center gap-6 md:gap-12">
-                                <span class="hero-title-font text-purple-600 italic flex items-center bg-white px-4 md:px-6 py-2 rounded-2xl shadow-sm border-2 border-purple-50">
+                                <span class="hero-title-font text-purple-600 italic flex items-center bg-white px-4 md:px-6 py-2 rounded-2xl shadow-sm border-2 border-purple-50 text-nowrap">
                                     <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-pink-400 to-purple-600 flex items-center justify-center mr-3 md:mr-4 text-white shadow-lg"><i class="fas fa-user-ninja text-lg"></i></div>
                                     @${item.name}
                                 </span>
-                                <div class="flex items-center gap-6 md:gap-10 bg-slate-900 text-white px-6 md:px-8 py-2 md:py-3 rounded-[1.5rem] md:rounded-[2rem] border-4 border-slate-800 shadow-xl">
+                                <div class="flex items-center gap-6 md:gap-10 bg-slate-900 text-white px-6 md:px-8 py-2 md:py-3 rounded-[1.5rem] md:rounded-[2rem] border-4 border-slate-800 shadow-xl text-nowrap">
                                     <div class="flex items-center hero-title-font tracking-tighter text-cyan-400"><i class="fas fa-star mr-2 md:mr-4 text-yellow-400 text-2xl md:text-3xl text-nowrap"></i>EXP: <span class="ml-2">${sc.avg}</span></div>
                                 </div>
                                 ${item.link ? `
-                                <a href="${item.link}" target="_blank" class="btn-showcase px-6 py-3 rounded-2xl font-black text-sm md:text-lg flex items-center transition active:scale-90">
+                                <a href="${item.link}" target="_blank" class="btn-showcase px-6 py-3 rounded-2xl font-black text-sm md:text-lg flex items-center transition active:scale-90 text-nowrap">
                                     朝聖成果 <i class="fas fa-external-link-alt ml-2"></i>
                                 </a>` : ''}
                             </div>
                         </div>
-                        
                         <div class="flex flex-col sm:flex-row items-center gap-4 md:gap-6 w-full xl:w-auto justify-end pt-6 xl:pt-0 border-t xl:border-t-0 border-slate-100">
-                            <span class="w-full sm:w-auto text-center px-8 md:px-10 py-4 md:py-5 rounded-[1.5rem] md:rounded-[2rem] text-lg md:text-xl font-black tracking-widest border-b-[6px] shadow-lg transition-all ${getStatusClass(item.status)}">${item.status || '🚀 正在起飛'}</span>
-                            <div class="flex gap-3 md:gap-4 w-full sm:w-auto justify-center">
-                                <button onclick="toggleStatus('${item.id}')" title="進度切換" class="btn-game flex-1 sm:flex-none p-5 md:p-6 bg-white text-slate-400 hover:text-purple-600 rounded-[1.5rem] md:rounded-[2rem] transition shadow-md border-2 border-slate-100 active:scale-90"><i class="fas fa-sync-alt text-2xl md:text-4xl text-nowrap"></i></button>
-                                <button onclick="updateProjectLink('${item.id}')" title="貼上成果網址" class="btn-game flex-1 sm:flex-none p-5 md:p-6 bg-white text-purple-600 hover:bg-purple-50 rounded-[1.5rem] md:rounded-[2rem] transition shadow-md border-2 border-slate-100 active:scale-90"><i class="fas fa-link text-2xl md:text-4xl text-nowrap"></i></button>
-                                ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="btn-game flex-[2] sm:flex-none bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 md:px-10 py-5 rounded-[1.5rem] md:rounded-[2rem] font-black text-lg md:text-2xl tracking-[0.1em] md:tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 pulse-soft text-nowrap uppercase">奧援 ⚡</button>` : ''}
-                                <button onclick="deleteProject('${item.id}')" class="btn-game flex-1 sm:flex-none p-5 md:p-6 bg-white text-slate-200 hover:text-red-500 rounded-[1.5rem] md:rounded-[2rem] transition shadow-md border-2 border-slate-100"><i class="far fa-trash-alt text-2xl md:text-4xl text-nowrap uppercase"></i></button>
+                            <span class="w-full sm:w-auto text-center px-8 md:px-10 py-4 md:py-5 rounded-[1.5rem] md:rounded-[2rem] text-lg md:text-xl font-black tracking-widest border-b-[6px] shadow-lg transition-all ${getStatusClass(item.status)} text-nowrap">${item.status || '🚀 正在起飛'}</span>
+                            <div class="flex gap-3 md:gap-4 w-full sm:w-auto justify-center text-nowrap">
+                                <button onclick="toggleStatus('${item.id}')" title="切換進度" class="btn-game flex-1 sm:flex-none p-5 md:p-6 bg-white text-slate-400 hover:text-purple-600 rounded-[1.5rem] md:rounded-[2rem] transition shadow-md border-2 border-slate-100 active:scale-90"><i class="fas fa-sync-alt text-2xl md:text-4xl"></i></button>
+                                <button onclick="updateProjectLink('${item.id}')" title="更新網址" class="btn-game flex-1 sm:flex-none p-5 md:p-6 bg-white text-purple-600 hover:bg-purple-50 rounded-[1.5rem] md:rounded-[2rem] transition shadow-md border-2 border-slate-100 active:scale-90"><i class="fas fa-link text-2xl md:text-4xl"></i></button>
+                                ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="btn-game flex-[2] sm:flex-none bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 md:px-10 py-5 rounded-[1.5rem] md:rounded-[2rem] font-black text-lg md:text-2xl tracking-[0.1em] md:tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 pulse-soft uppercase">奧援 ⚡</button>` : ''}
+                                <button onclick="deleteProject('${item.id}')" class="btn-game flex-1 sm:flex-none p-5 md:p-6 bg-white text-slate-200 hover:text-red-500 rounded-[1.5rem] md:rounded-[2rem] transition shadow-md border-2 border-slate-100"><i class="far fa-trash-alt text-2xl md:text-4xl uppercase"></i></button>
                             </div>
                         </div>
                     </div>
@@ -436,9 +382,7 @@
             items.forEach(item => {
                 const n = item.name || "勇者";
                 if (!stats[n]) stats[n] = { total: 0, logic: 0, utility: 0, innovation: 0, vCount: 0 };
-                if ((item.status || "").includes('達成') || (item.status || "").includes('完成')) {
-                    stats[n].total++;
-                }
+                if ((item.status || "").includes('達成') || (item.status || "").includes('完成')) { stats[n].total++; }
                 const votes = Object.values(item.votes || {});
                 if (votes.length > 0) {
                     votes.forEach(v => { 
@@ -449,7 +393,6 @@
                     });
                 }
             });
-            
             const sorted = Object.keys(stats).sort((a,b) => {
                 const getPower = (name) => {
                     const s = stats[name];
@@ -458,7 +401,6 @@
                 };
                 return getPower(b) - getPower(a);
             });
-
             document.getElementById('summaryTableBody').innerHTML = sorted.map((name, idx) => {
                 const s = stats[name];
                 const avgL = s.vCount > 0 ? (s.logic / s.vCount).toFixed(1) : '0.0';
@@ -466,27 +408,11 @@
                 const avgI = s.vCount > 0 ? (s.innovation / s.vCount).toFixed(1) : '0.0';
                 const avgBase = s.vCount > 0 ? (parseFloat(avgL) + parseFloat(avgU) + parseFloat(avgI)) / 3 : 0;
                 const totalPower = (avgBase + (s.total * 0.2)).toFixed(1);
-                
                 const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '👤';
-
-                return `
-                <tr class="hover:bg-purple-50/50 transition-colors group border-b border-slate-50">
-                    <td class="px-6 md:px-10 py-8 md:py-12 font-black text-slate-800 text-2xl md:text-4xl name-cell italic">
-                        <span class="mr-4 md:mr-8 inline-block transform group-hover:rotate-12 transition-transform">${medal}</span>@${name}
-                    </td>
-                    <td class="px-4 md:px-6 py-8 md:py-12 text-center text-purple-500 font-black text-2xl md:text-4xl italic">+${(s.total * 0.2).toFixed(1)}</td>
-                    <td class="px-4 md:px-6 py-8 md:py-12 text-center text-slate-400 font-black text-2xl md:text-4xl font-mono">${s.vCount}</td>
-                    <td class="px-4 md:px-6 py-8 md:py-12 text-center font-bold text-slate-400 italic text-xl md:text-3xl">${avgL}</td>
-                    <td class="px-4 md:px-6 py-8 md:py-12 text-center font-bold text-slate-400 italic text-xl md:text-3xl">${avgU}</td>
-                    <td class="px-4 md:px-6 py-8 md:py-12 text-center font-bold text-orange-400 italic text-xl md:text-3xl">${avgI}</td>
-                    <td class="px-6 md:px-12 py-8 md:py-12 text-right">
-                        <span class="achievement-score font-mono shadow-sm bg-white px-4 md:px-8 py-2 md:py-4 rounded-[1.5rem] md:rounded-[3rem] border-2 md:border-4 border-purple-50 italic">${totalPower}</span>
-                    </td>
-                </tr>`;
+                return `<tr class="hover:bg-purple-50/50 transition-colors group border-b border-slate-50 text-nowrap"><td class="px-6 md:px-10 py-8 md:py-12 font-black text-slate-800 text-2xl md:text-4xl name-cell italic text-nowrap"><span class="mr-4 md:mr-8 inline-block transform group-hover:rotate-12 transition-transform">${medal}</span>@${name}</td><td class="px-4 md:px-6 py-8 md:py-12 text-center text-purple-500 font-black text-2xl md:text-4xl italic text-nowrap">+${(s.total * 0.2).toFixed(1)}</td><td class="px-4 md:px-6 py-8 md:py-12 text-center text-slate-400 font-black text-2xl md:text-4xl font-mono text-nowrap">${s.vCount}</td><td class="px-4 md:px-6 py-8 md:py-12 text-center font-bold text-slate-400 italic text-xl md:text-3xl text-nowrap">${avgL}</td><td class="px-4 md:px-6 py-8 md:py-12 text-center font-bold text-slate-400 italic text-xl md:text-3xl text-nowrap">${avgU}</td><td class="px-4 md:px-6 py-8 md:py-12 text-center font-bold text-orange-400 italic text-xl md:text-3xl text-nowrap">${avgI}</td><td class="px-6 md:px-12 py-8 md:py-12 text-right text-nowrap"><span class="achievement-score font-mono shadow-sm bg-white px-4 md:px-8 py-2 md:py-4 rounded-[1.5rem] md:rounded-[3rem] border-2 md:border-4 border-purple-50 italic text-nowrap">${totalPower}</span></td></tr>`;
             }).join('');
         }
 
-        // --- Core Functions ---
         document.getElementById('aiForm').onsubmit = async (e) => {
             e.preventDefault();
             const uniqueId = Date.now().toString() + Math.random().toString(36).substring(2, 5);
@@ -494,7 +420,7 @@
                 action: 'create', id: uniqueId,
                 name: document.getElementById('name').value.trim(),
                 topic: document.getElementById('topic').value.trim(),
-                link: '', // 初始連結為空
+                link: '', 
                 startDate: document.getElementById('startDate').value,
                 deadline: document.getElementById('deadline').value,
                 status: '🚀 正在起飛'
@@ -507,16 +433,13 @@
             const targetId = id.toString();
             const item = globalData.find(p => p.id.toString() === targetId);
             const currentLink = item ? (item.link || '') : '';
-            
             const newLink = prompt("🔗 請貼上您的成果網址 (包含 https://):", currentLink);
-            if (newLink === null) return; // 取消
-            
-            // 簡單檢查網址格式
+            if (newLink === null) return; 
             if (newLink.trim() !== "" && !newLink.startsWith('http')) {
                 showToast("網址格式不正確喔！");
                 return;
             }
-
+            // 立即顯示以增加體驗 (Optimistic UI)
             item.link = newLink.trim();
             updateUI();
             await cloudAction({ action: 'updateLink', id: targetId, link: newLink.trim() });
@@ -526,13 +449,11 @@
             const targetId = id.toString();
             const item = globalData.find(p => p.id.toString() === targetId);
             if (!item) return;
-            
             const states = ['🚀 正在起飛', '🔍 實驗室調校中', '✨ 圓滿達成目標'];
             let curIdx = 0;
             const curText = (item.status || "").toString();
             if (curText.includes('調校')) curIdx = 1;
             else if (curText.includes('達成') || curText.includes('完成')) curIdx = 2;
-            
             const nStatus = states[(curIdx + 1) % 3];
             item.status = nStatus;
             updateUI(); 
@@ -570,7 +491,6 @@
 
         function showLoading(s) { document.getElementById('loading').style.display = s ? 'flex' : 'none'; }
         function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 3000); }
-        
         function getStatusClass(s) { 
             const t = (s || "").toString();
             if (t.includes('達成') || t.includes('完成')) return 'bg-emerald-500 text-white border-emerald-700 shadow-emerald-200';
