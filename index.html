@@ -22,6 +22,7 @@
             color: #2d3748;
             overflow-x: hidden;
         }
+        /* 遊戲質感卡片 */
         .adventure-card { 
             background: rgba(255, 255, 255, 0.95); 
             backdrop-filter: blur(12px); 
@@ -29,7 +30,6 @@
             box-shadow: 0 15px 35px -5px rgba(112, 0, 255, 0.1);
             border: 3px solid #ffffff;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            overflow: hidden; /* 防止內容溢出 */
         }
         .adventure-card:hover {
             transform: translateY(-5px) scale(1.01);
@@ -41,7 +41,7 @@
         .star-rating-active { color: var(--game-yellow); text-shadow: 0 0 10px rgba(255, 238, 0, 0.5); }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .pulse-soft { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
         .loading-overlay { background: rgba(240, 242, 249, 0.9); display: none; }
         
         .summary-table th { font-size: 1rem; background: var(--game-purple); color: white; padding: 1.2rem; border: none; white-space: nowrap; }
@@ -56,46 +56,96 @@
         .hero-title-font { font-size: 1.75rem; font-weight: 900; }
         input { border: 2px solid #e2e8f0 !important; border-radius: 1.2rem !important; }
 
-        /* 讓主題強制單行且過長時顯示省略號 */
+        /* 題目顯示優化：強制單行、完整顯示、不縮減 */
         .topic-title {
+            font-weight: 900;
+            white-space: nowrap; /* 強制單行 */
+            overflow: visible;   /* 完整顯示，不隱藏 */
+            text-overflow: clip;
+            display: inline-block;
+        }
+        
+        /* 朝聖連結按鈕樣式 */
+        .btn-showcase-inline {
+            background: #ffffff;
+            color: var(--game-purple);
+            border: 2px solid var(--game-purple);
+            box-shadow: 0 4px 0px var(--game-purple);
+            padding: 0.5rem 1.2rem;
+            border-radius: 1rem;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.2s;
+            font-size: 1rem;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-            display: block;
+            height: fit-content;
+        }
+        .btn-showcase-inline:hover {
+            background: var(--game-purple);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* 管理員按鈕大型強化 */
+        .btn-admin-major {
+            background: #1e293b;
+            color: #ffffff;
+            padding: 1.2rem;
+            border-radius: 1.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.2);
+            border: 2px solid #334155;
+        }
+        .btn-admin-major:hover {
+            background: #0f172a;
+        }
+        .btn-admin-unlocked {
+            background: var(--game-purple) !important;
+            border-color: #ffffff !important;
         }
     </style>
 </head>
-<body class="min-h-screen py-6 md:py-10 px-4 md:px-6">
+<body class="min-h-screen py-6 md:py-10 px-4 md:px-6 text-slate-800">
 
+    <!-- 同步遮罩 -->
     <div id="loading" class="fixed inset-0 z-[100] flex items-center justify-center loading-overlay backdrop-blur-sm">
         <div class="text-center p-6 bg-white rounded-3xl shadow-2xl">
             <div class="p-6 bg-white rounded-full pulse-soft inline-block">
                 <i class="fas fa-gamepad text-6xl text-purple-600"></i>
             </div>
-            <p class="text-purple-600 font-black text-2xl mt-4 tracking-widest uppercase">資料同步中...</p>
+            <p class="text-purple-600 font-black text-xl md:text-3xl mt-4 tracking-widest uppercase">數據同步中...</p>
         </div>
     </div>
 
     <div class="max-w-[1500px] mx-auto">
         <header class="text-center mb-10 md:mb-16">
-            <h1 class="text-4xl md:text-7xl font-black text-slate-900 mb-6 italic uppercase tracking-tighter">AI <span class="text-purple-600">Innovation</span> Quest</h1>
-            <p class="text-slate-500 text-lg md:text-2xl font-bold">達成任務後「逾期提示」將自動隱藏，讓版面更清爽 ✨</p>
+            <h1 class="text-4xl md:text-7xl font-black text-slate-900 mb-6 italic uppercase tracking-tighter text-nowrap text-balance">AI <span class="text-purple-600">Innovation</span> Quest</h1>
+            <p class="text-slate-500 text-lg md:text-2xl font-bold">這不是工作，這是一場進化的冒險 ✨</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
+            <!-- 側邊欄 -->
             <aside class="lg:col-span-3 order-2 lg:order-1">
                 <div class="adventure-card p-6 md:p-10 sticky top-8 border-b-[10px] border-b-purple-100 shadow-2xl">
-                    <h2 class="text-2xl md:text-3xl font-black mb-8 text-purple-600 flex items-center italic">
+                    <h2 class="text-2xl md:text-3xl font-black mb-8 text-purple-600 flex items-center italic text-nowrap">
                         <i class="fas fa-plus-square mr-4 text-pink-500"></i> 發起任務
                     </h2>
                     <form id="aiForm" class="space-y-6 md:space-y-8">
                         <div>
-                            <label class="block text-xs font-black text-slate-400 uppercase mb-3 ml-1 tracking-widest">冒險者稱號</label>
+                            <label class="block text-xs font-black text-slate-400 uppercase mb-3 ml-1 tracking-widest text-nowrap">冒險者稱號</label>
                             <input type="text" id="name" required placeholder="您的姓名" class="w-full px-5 py-4 bg-white font-bold text-lg shadow-inner">
                         </div>
                         <div>
-                            <label class="block text-xs font-black text-slate-400 uppercase mb-3 ml-1 tracking-widest">任務主題</label>
+                            <label class="block text-xs font-black text-slate-400 uppercase mb-3 ml-1 tracking-widest text-nowrap">任務主題</label>
                             <input type="text" id="topic" required placeholder="想進化的點子" class="w-full px-5 py-4 bg-white font-bold text-lg shadow-inner">
                         </div>
                         <div class="grid grid-cols-1 gap-4 md:gap-6 text-nowrap">
@@ -108,18 +158,19 @@
                                 <input type="date" id="deadline" required class="w-full px-4 py-3 bg-white font-bold text-sm">
                             </div>
                         </div>
-                        <button type="submit" class="btn-game w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black py-5 rounded-2xl md:rounded-3xl shadow-lg text-xl md:text-2xl uppercase tracking-[0.1em]">
+                        <button type="submit" class="btn-game w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-black py-5 rounded-2xl md:rounded-3xl shadow-lg text-xl md:text-2xl uppercase tracking-[0.1em] text-nowrap">
                             啟動冒險 🚀
                         </button>
                     </form>
-                    <div class="mt-8 pt-8 border-t border-slate-100 text-nowrap">
-                        <button onclick="toggleAdminView()" id="adminBtn" class="w-full py-4 bg-slate-100 text-slate-600 border-2 border-slate-200 rounded-2xl font-black text-lg hover:bg-slate-900 hover:text-white transition-all shadow-md">
+                    <div class="mt-8 pt-8 border-t border-slate-100">
+                        <button onclick="toggleAdminView()" id="adminBtn" class="btn-admin-major text-nowrap">
                             <i class="fas fa-user-shield mr-2"></i> 管理員模式
                         </button>
                     </div>
                 </div>
             </aside>
 
+            <!-- 主看板區 -->
             <main class="lg:col-span-9 space-y-16 md:space-y-24 order-1 lg:order-2">
                 <div>
                     <div class="flex flex-col sm:flex-row justify-between items-center sm:items-end mb-8 md:mb-12 px-2 md:px-6 gap-4">
@@ -130,17 +181,18 @@
                             冒險總數: <span id="projectCount" class="text-cyan-400 ml-2">0</span>
                         </div>
                     </div>
-                    <div id="projectList" class="space-y-6 md:space-y-8"></div>
+                    <div id="projectList" class="space-y-8 md:space-y-12"></div>
                 </div>
 
+                <!-- 戰力榜 -->
                 <div class="pt-12 border-t-4 border-slate-200">
                     <h2 class="text-3xl md:text-5xl font-black text-slate-900 mb-12 italic flex items-center text-nowrap">
                         <i class="fas fa-crown mr-4 text-yellow-400"></i> 夥伴探險戰力榜
                     </h2>
                     <div class="adventure-card shadow-2xl overflow-hidden bg-white">
                         <div class="overflow-x-auto no-scrollbar">
-                            <table class="w-full text-left summary-table">
-                                <thead class="tracking-widest">
+                            <table class="w-full text-left border-collapse summary-table">
+                                <thead class="tracking-widest text-nowrap">
                                     <tr>
                                         <th class="px-6 py-6 md:px-10">英雄冒險者</th>
                                         <th class="px-4 text-center text-nowrap">探險加成</th>
@@ -157,30 +209,30 @@
         </div>
     </div>
 
-    <!-- Rating Modal -->
+    <!-- 評分彈窗 -->
     <div id="ratingModal" class="fixed inset-0 bg-purple-900/80 hidden flex items-center justify-center z-50 p-4 backdrop-blur-xl">
         <div class="bg-white rounded-[3rem] p-8 md:p-12 max-w-2xl w-full shadow-2xl border-8 border-white overflow-y-auto max-h-[90vh]">
             <div class="text-center mb-8">
-                <div class="text-6xl mb-4 pulse-soft">✨</div>
+                <div class="text-6xl mb-4 pulse-soft text-nowrap">✨</div>
                 <h3 class="text-3xl md:text-5xl font-black text-slate-900 mb-2">傳送奧援能量</h3>
-                <p id="ratingProjectName" class="text-purple-600 font-black text-xl md:text-2xl italic"></p>
+                <p id="ratingProjectName" class="text-purple-600 font-black text-xl md:text-2xl italic text-wrap"></p>
             </div>
             <div class="space-y-8">
-                <input type="text" id="voterName" placeholder="您的英雄稱號" class="w-full bg-slate-50 border-4 border-slate-100 rounded-[1.5rem] px-8 py-4 font-black text-2xl text-center shadow-inner">
+                <input type="text" id="voterName" placeholder="您的英雄稱號" class="w-full bg-slate-50 border-4 border-slate-100 rounded-[1.5rem] px-8 py-4 font-black text-2xl text-center shadow-inner text-nowrap">
                 <div class="space-y-6 bg-purple-50 p-8 rounded-[2rem] border-4 border-white">
-                    <div class="rating-row" data-category="logic"><label class="flex justify-between font-black text-purple-400 uppercase text-nowrap">底層邏輯 <span class="score-display text-purple-600 text-3xl">0</span></label><div class="flex justify-between text-5xl star-row"><i class="far fa-star cursor-pointer" data-val="1"></i><i class="far fa-star cursor-pointer" data-val="2"></i><i class="far fa-star cursor-pointer" data-val="3"></i><i class="far fa-star cursor-pointer" data-val="4"></i><i class="far fa-star cursor-pointer" data-val="5"></i></div></div>
-                    <div class="rating-row" data-category="utility"><label class="flex justify-between font-black text-purple-400 uppercase text-nowrap">辦公實用 <span class="score-display text-emerald-500 text-3xl">0</span></label><div class="flex justify-between text-5xl star-row"><i class="far fa-star cursor-pointer" data-val="1"></i><i class="far fa-star cursor-pointer" data-val="2"></i><i class="far fa-star cursor-pointer" data-val="3"></i><i class="far fa-star cursor-pointer" data-val="4"></i><i class="far fa-star cursor-pointer" data-val="5"></i></div></div>
-                    <div class="rating-row" data-category="innovation"><label class="flex justify-between font-black text-purple-400 uppercase text-nowrap text-nowrap">技術創新 <span class="score-display text-orange-500 text-3xl">0</span></label><div class="flex justify-between text-5xl star-row"><i class="far fa-star cursor-pointer" data-val="1"></i><i class="far fa-star cursor-pointer" data-val="2"></i><i class="far fa-star cursor-pointer" data-val="3"></i><i class="far fa-star cursor-pointer" data-val="4"></i><i class="far fa-star cursor-pointer" data-val="5"></i></div></div>
+                    <div class="rating-row" data-category="logic"><label class="flex justify-between font-black text-purple-400 uppercase text-nowrap">底層邏輯 <span class="score-display text-purple-600 text-3xl">0</span></label><div class="flex justify-between text-5xl star-row text-nowrap"><i class="far fa-star cursor-pointer" data-val="1"></i><i class="far fa-star cursor-pointer" data-val="2"></i><i class="far fa-star cursor-pointer" data-val="3"></i><i class="far fa-star cursor-pointer" data-val="4"></i><i class="far fa-star cursor-pointer" data-val="5"></i></div></div>
+                    <div class="rating-row" data-category="utility"><label class="flex justify-between font-black text-purple-400 uppercase text-nowrap text-nowrap">辦公實用 <span class="score-display text-emerald-500 text-3xl">0</span></label><div class="flex justify-between text-5xl star-row text-nowrap"><i class="far fa-star cursor-pointer" data-val="1"></i><i class="far fa-star cursor-pointer" data-val="2"></i><i class="far fa-star cursor-pointer" data-val="3"></i><i class="far fa-star cursor-pointer" data-val="4"></i><i class="far fa-star cursor-pointer" data-val="5"></i></div></div>
+                    <div class="rating-row" data-category="innovation"><label class="flex justify-between font-black text-purple-400 uppercase text-nowrap text-nowrap">技術創新 <span class="score-display text-orange-500 text-3xl">0</span></label><div class="flex justify-between text-5xl star-row text-nowrap"><i class="far fa-star cursor-pointer" data-val="1"></i><i class="far fa-star cursor-pointer" data-val="2"></i><i class="far fa-star cursor-pointer" data-val="3"></i><i class="far fa-star cursor-pointer" data-val="4"></i><i class="far fa-star cursor-pointer" data-val="5"></i></div></div>
                 </div>
             </div>
-            <div class="flex gap-4 mt-12">
-                <button onclick="closeRatingModal()" class="flex-1 py-5 bg-slate-100 rounded-2xl font-black text-slate-400 text-xl text-nowrap">稍後</button>
-                <button onclick="submitMultiVote()" class="flex-[2] btn-game bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-2xl font-black text-xl text-nowrap">傳送能量 ⚡</button>
+            <div class="flex gap-4 mt-12 text-nowrap">
+                <button onclick="closeRatingModal()" class="flex-1 py-5 bg-slate-100 rounded-2xl font-black text-slate-400 text-xl text-nowrap text-nowrap">稍後</button>
+                <button onclick="submitMultiVote()" class="flex-[2] btn-game bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-2xl font-black text-xl text-nowrap text-nowrap text-nowrap">傳送能量 ⚡</button>
             </div>
         </div>
     </div>
 
-    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 px-10 py-5 bg-slate-900 text-white rounded-full opacity-0 transition-all duration-500 z-[110] font-black tracking-widest text-lg">動作成功！</div>
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 px-10 py-5 bg-slate-900 text-white rounded-full opacity-0 transition-all duration-500 z-[110] font-black tracking-widest text-lg text-nowrap text-nowrap">動作成功！</div>
 
     <script>
         const GAS_URL = 'https://script.google.com/macros/s/AKfycbwW-rvZr0lOzoJFfQc_t6ML_Ogx80gKEMZ_6C57iflWFiov5KeSQUwIwHtMlu2AlAd9/exec';
@@ -193,9 +245,9 @@
         function getRemainingDaysLabel(deadlineStr, status) {
             if (!deadlineStr || (status || "").includes('達成') || (status || "").includes('完成')) return "";
             const diffDays = Math.ceil((new Date(deadlineStr) - new Date().setHours(0,0,0,0)) / 86400000);
-            if (diffDays < 0) return `<span class="bg-red-500 text-white px-3 py-1 rounded-full font-black text-[10px] shadow-sm border-2 border-white ml-2 whitespace-nowrap text-nowrap">逾期: ${Math.abs(diffDays)}天</span>`;
-            if (diffDays === 0) return `<span class="bg-yellow-400 text-purple-900 px-3 py-1 rounded-full font-black text-[10px] shadow-sm border-2 border-white pulse-soft ml-2 text-nowrap">最後一天!</span>`;
-            return `<span class="bg-cyan-400 text-purple-900 px-3 py-1 rounded-full font-black text-[10px] shadow-sm border-2 border-white ml-2 whitespace-nowrap text-nowrap">剩餘: ${diffDays}天</span>`;
+            if (diffDays < 0) return `<span class="bg-red-500 text-white px-3 py-1 rounded-full font-black text-[9px] shadow-sm border-2 border-white ml-2 text-nowrap text-nowrap text-nowrap text-nowrap">逾期: ${Math.abs(diffDays)}天</span>`;
+            if (diffDays === 0) return `<span class="bg-yellow-400 text-purple-900 px-3 py-1 rounded-full font-black text-[9px] shadow-sm border-2 border-white pulse-soft ml-2 text-nowrap text-nowrap text-nowrap text-nowrap">最後一天!</span>`;
+            return `<span class="bg-cyan-400 text-purple-900 px-3 py-1 rounded-full font-black text-[9px] shadow-sm border-2 border-white ml-2 text-nowrap text-nowrap text-nowrap text-nowrap">剩餘: ${diffDays}天</span>`;
         }
 
         async function fetchData() {
@@ -223,7 +275,7 @@
 
         function renderProjects(items) {
             const list = document.getElementById('projectList');
-            if (items.length === 0) { list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-2xl bg-white/30 rounded-[2rem] border-4 border-dashed border-slate-200">讀取冒險日誌中...</div>'; return; }
+            if (items.length === 0) { list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-2xl bg-white/30 rounded-[2rem] border-4 border-dashed border-slate-200 text-nowrap text-balance">讀取冒險日誌中...</div>'; return; }
             list.innerHTML = [...items].reverse().map(item => {
                 const voters = Object.keys(item.votes || {}), vCount = voters.length;
                 let sum = 0; voters.forEach(v => sum += (Number(item.votes[v].logic) + Number(item.votes[v].utility) + Number(item.votes[v].innovation)));
@@ -233,58 +285,68 @@
                 return `
                 <div class="adventure-card p-6 md:p-10 border-2 border-white group">
                     <div class="flex flex-col lg:flex-row justify-between items-start gap-8">
-                        <div class="flex-1 space-y-6 w-full overflow-hidden text-nowrap">
-                            <div class="flex flex-wrap items-center gap-2">
-                                <span class="px-3 py-1 bg-purple-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest text-nowrap">MISSION #${item.id.toString().slice(-4)}</span>
-                                <div class="text-xs md:text-lg text-slate-500 font-black bg-white/80 px-4 py-1.5 rounded-full border border-slate-100 shadow-sm flex items-center whitespace-nowrap">
+                        <div class="flex-1 space-y-6 w-full min-w-0 overflow-visible">
+                            <!-- MISSION 標籤與時間 -->
+                            <div class="flex flex-wrap items-center gap-2 text-nowrap">
+                                <span class="px-3 py-1 bg-purple-600 text-white rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest text-nowrap">MISSION #${item.id.toString().slice(-4)}</span>
+                                <div class="text-xs md:text-lg text-slate-500 font-black bg-white/80 px-4 py-1.5 rounded-full border border-slate-100 shadow-sm flex items-center whitespace-nowrap text-nowrap text-nowrap">
                                     <i class="far fa-clock mr-2 text-purple-500 text-nowrap"></i>${formatDate(item.startdate)} ➔ ${formatDate(item.deadline)}
                                     ${getRemainingDaysLabel(item.deadline, item.status)}
                                 </div>
                             </div>
                             
-                            <div class="flex items-center gap-4 text-nowrap">
-                                <h3 class="text-2xl md:text-4xl font-black text-slate-800 italic uppercase leading-tight tracking-tighter topic-title">${item.topic}</h3>
-                                ${item.link ? `<a href="${item.link}" target="_blank" class="px-4 py-1.5 bg-white border-2 border-purple-600 text-purple-600 font-black rounded-xl hover:bg-purple-600 hover:text-white transition shadow-md text-sm whitespace-nowrap">朝聖成果 <i class="fas fa-external-link-alt ml-1"></i></a>` : ''}
+                            <!-- 任務主題 (強制單行，不縮減) -->
+                            <div class="overflow-visible">
+                                <h3 class="text-2xl md:text-4xl text-slate-800 italic uppercase leading-tight tracking-tighter topic-title">
+                                    ${item.topic}
+                                </h3>
                             </div>
 
+                            <!-- 冒險者、EXP 分數與朝聖按鈕 (並排顯示) -->
                             <div class="flex flex-wrap items-center gap-6">
-                                <span class="hero-title-font text-purple-600 italic flex items-center bg-white px-5 py-2 rounded-2xl shadow-sm border-2 border-purple-50 whitespace-nowrap">
-                                    <i class="fas fa-user-ninja mr-3"></i>@${item.name}
+                                <span class="hero-title-font text-purple-600 italic flex items-center bg-white px-5 py-2 rounded-2xl shadow-sm border-2 border-purple-50 text-nowrap text-nowrap">
+                                    <i class="fas fa-user-ninja mr-3 text-nowrap text-nowrap"></i>@${item.name}
                                 </span>
-                                <div class="bg-slate-900 text-white px-6 py-2 rounded-[2rem] border-4 border-slate-800 shadow-xl whitespace-nowrap">
-                                    <div class="flex items-center hero-title-font tracking-tighter text-cyan-400"><i class="fas fa-star mr-2 text-yellow-400"></i>EXP: ${avg}</div>
+                                <div class="flex items-center gap-4 text-nowrap">
+                                    <div class="bg-slate-900 text-white px-6 py-2 rounded-[2rem] border-4 border-slate-800 shadow-xl">
+                                        <div class="flex items-center hero-title-font tracking-tighter text-cyan-400 text-nowrap"><i class="fas fa-star mr-2 text-yellow-400 text-nowrap"></i>EXP: ${avg}</div>
+                                    </div>
+                                    ${item.link ? `<a href="${item.link}" target="_blank" class="btn-showcase-inline">朝聖成果 <i class="fas fa-external-link-alt ml-1"></i></a>` : ''}
                                 </div>
                             </div>
                         </div>
                         
-                        <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto text-nowrap">
-                            <span class="px-8 py-4 rounded-2xl text-lg font-black border-b-4 shadow-lg ${getStatusClass(item.status)} whitespace-nowrap">${item.status || '🚀 正在起飛'}</span>
-                            <div class="flex flex-wrap gap-2 justify-center">
-                                <button onclick="toggleStatus('${item.id}')" class="p-5 bg-white text-slate-400 rounded-2xl border-2 border-slate-100 btn-game"><i class="fas fa-sync-alt text-2xl"></i></button>
-                                <button onclick="updateProjectLink('${item.id}')" class="p-5 bg-white text-purple-600 rounded-2xl border-2 border-slate-100 btn-game"><i class="fas fa-link text-2xl"></i></button>
-                                ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-2xl font-black text-xl btn-game pulse-soft">奧援 ⚡</button>` : ''}
-                                <button onclick="deleteProject('${item.id}')" class="p-5 bg-white text-slate-200 hover:text-red-500 rounded-2xl border-2 border-slate-100 btn-game"><i class="far fa-trash-alt text-2xl"></i></button>
+                        <!-- 右側控制按鈕 -->
+                        <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto lg:min-w-[400px] justify-end pt-6 lg:pt-0 border-t lg:border-t-0 border-slate-100 text-nowrap">
+                            <span class="w-full sm:w-auto text-center px-8 py-4 rounded-2xl text-lg font-black border-b-4 shadow-lg ${getStatusClass(item.status)} text-nowrap">
+                                ${item.status || '🚀 正在起飛'}
+                            </span>
+                            <div class="flex flex-wrap gap-2 justify-center text-nowrap">
+                                <button onclick="toggleStatus('${item.id}')" title="切換進度" class="p-5 bg-white text-slate-400 rounded-2xl border-2 border-slate-100 btn-game text-nowrap"><i class="fas fa-sync-alt text-2xl text-nowrap"></i></button>
+                                <button onclick="updateProjectLink('${item.id}')" title="連結管理" class="p-5 bg-white text-purple-600 rounded-2xl border-2 border-slate-100 btn-game text-nowrap"><i class="fas fa-link text-2xl text-nowrap text-nowrap text-nowrap"></i></button>
+                                ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-2xl font-black text-xl btn-game pulse-soft text-nowrap text-nowrap text-nowrap">奧援 ⚡</button>` : ''}
+                                <button onclick="deleteProject('${item.id}')" class="p-5 bg-white text-slate-200 hover:text-red-500 rounded-2xl border-2 border-slate-100 btn-game text-nowrap text-nowrap text-nowrap text-nowrap text-nowrap"><i class="far fa-trash-alt text-2xl text-nowrap"></i></button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 管理員專用：評分詳情日誌 -->
+                    <!-- 管理員專用：詳細評分日誌 -->
                     <div class="${isAdminView ? 'block' : 'hidden'} mt-10 pt-10 border-t-4 border-dashed border-slate-100 animate-in fade-in">
                         <p class="w-full text-lg font-black text-slate-400 uppercase tracking-[0.4em] mb-6">奧援歷史日誌 (管理員專用)</p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-nowrap text-nowrap">
                             ${vCount > 0 ? voters.map(v => `
                                 <div class="bg-white p-6 rounded-[2rem] border-4 border-slate-50 shadow-sm flex flex-col gap-3">
                                     <div class="flex justify-between items-center border-b-2 border-slate-50 pb-3">
-                                        <span class="text-purple-600 text-2xl font-black italic">@${v}</span>
-                                        <span class="text-slate-300 text-sm font-mono">${item.votes[v].time || ''}</span>
+                                        <span class="text-purple-600 text-2xl font-black italic text-nowrap">@${v}</span>
+                                        <span class="text-slate-300 text-sm font-mono text-nowrap">${item.votes[v].time || ''}</span>
                                     </div>
-                                    <div class="flex gap-4 text-lg font-black text-slate-400 italic">
-                                        <span class="bg-purple-50 px-3 py-1 rounded-xl">L: ${item.votes[v].logic}</span>
-                                        <span class="bg-emerald-50 px-3 py-1 rounded-xl">U: ${item.votes[v].utility}</span>
-                                        <span class="bg-orange-50 px-3 py-1 rounded-xl">I: ${item.votes[v].innovation}</span>
+                                    <div class="flex gap-4 text-lg font-black text-slate-400 italic text-nowrap text-nowrap text-nowrap">
+                                        <span class="bg-purple-50 px-3 py-1 rounded-xl text-nowrap text-nowrap">L: ${item.votes[v].logic}</span>
+                                        <span class="bg-emerald-50 px-3 py-1 rounded-xl text-nowrap text-nowrap">U: ${item.votes[v].utility}</span>
+                                        <span class="bg-orange-50 px-3 py-1 rounded-xl text-nowrap text-nowrap">I: ${item.votes[v].innovation}</span>
                                     </div>
                                 </div>
-                            `).join('') : '<p class="text-slate-400 italic text-2xl px-4">尚無能量傳送紀錄。</p>'}
+                            `).join('') : '<p class="text-slate-400 italic text-2xl px-4 text-nowrap">尚無評分數據。</p>'}
                         </div>
                     </div>
                 </div>`;
@@ -306,7 +368,7 @@
                 const s = stats[name];
                 const totalPower = ((s.vCount > 0 ? (s.logic + s.utility + s.innovation) / (s.vCount * 3) : 0) + (s.total * 0.2)).toFixed(1);
                 const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '👤';
-                return `<tr class="border-b border-slate-50"><td class="px-6 py-10 md:px-10 font-black text-3xl whitespace-nowrap"><span class="mr-6 text-4xl">${medal}</span>@${name}</td><td class="text-center text-purple-500 font-black text-3xl text-nowrap">+${(s.total * 0.2).toFixed(1)}</td><td class="text-center text-slate-400 font-mono text-3xl text-nowrap">${s.vCount}</td><td class="text-right px-6 md:px-12 text-nowrap"><span class="achievement-score">${totalPower}</span></td></tr>`;
+                return `<tr class="border-b border-slate-50"><td class="px-6 py-10 md:px-10 font-black text-3xl name-cell italic text-nowrap text-nowrap text-nowrap"><span class="mr-4 md:mr-8 inline-block transform group-hover:rotate-12 transition-transform text-nowrap text-nowrap">${medal}</span>@${name}</td><td class="px-4 md:px-6 py-8 md:py-12 text-center text-purple-500 font-black text-2xl md:text-4xl italic text-nowrap text-nowrap">+${(s.total * 0.2).toFixed(1)}</td><td class="px-4 md:px-6 py-8 md:py-12 text-center text-slate-400 font-black text-2xl md:text-4xl font-mono text-nowrap text-nowrap">${s.vCount}</td><td class="px-6 md:px-12 py-8 md:py-12 text-right text-nowrap text-nowrap text-nowrap text-nowrap text-nowrap"><span class="achievement-score font-mono shadow-sm bg-white px-4 md:px-8 py-2 md:py-4 rounded-[1.5rem] md:rounded-[3rem] border-2 md:border-4 border-purple-50 italic text-nowrap text-nowrap">${totalPower}</span></td></tr>`;
             }).join('');
         }
 
@@ -365,9 +427,9 @@
         function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 3000); }
         function getStatusClass(s) {
             const t = (s || "").toString();
-            if (t.includes('達成')) return 'bg-emerald-500 text-white border-emerald-700';
-            if (t.includes('調校')) return 'bg-yellow-400 text-purple-900 border-yellow-600';
-            return 'bg-purple-600 text-white border-purple-800';
+            if (t.includes('達成')) return 'bg-emerald-500 text-white border-emerald-700 shadow-emerald-200 text-nowrap';
+            if (t.includes('調校')) return 'bg-yellow-400 text-purple-900 border-yellow-600 shadow-yellow-100 text-nowrap';
+            return 'bg-purple-600 text-white border-purple-800 shadow-purple-200 text-nowrap';
         }
         function formatDate(d) { if (!d) return ''; const date = new Date(d); return `${date.getMonth()+1}/${date.getDate()}`; }
         function openRatingModal(id, title) {
