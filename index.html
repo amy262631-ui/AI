@@ -392,15 +392,24 @@
         }
 
         async function submitMultiVote() {
-            const voter = document.getElementById('voterName').value.trim();
-            if (!voter || Object.values(selectedScores).some(v => v === 0)) return showToast("請完成評分！");
-            const item = globalData.find(p => p.id.toString() === currentRatingProjectId.toString());
-            if (item.name === voter) return showToast("不能投給自己！");
-            const nVotes = { ...(item.votes || {}) };
-            nVotes[voter] = { ...selectedScores, time: new Date().toLocaleString() };
-            await cloudAction({ action: 'updateVote', id: currentRatingProjectId.toString(), votes: nVotes });
-            closeRatingModal();
-        }
+    const voter = document.getElementById('voterName').value.trim();
+    if (!voter || Object.values(selectedScores).some(v => v === 0)) return showToast("請完成評分！");
+    const item = globalData.find(p => p.id.toString() === currentRatingProjectId.toString());
+    if (item.name === voter) return showToast("不能投給自己！");
+    
+    // ✅ 新增：檢查是否已投票過
+    const existingVotes = item.votes || {};
+    if (existingVotes[voter]) {
+        const prevTime = existingVotes[voter].time || '先前';
+        showToast(`⚡ ${voter} 已於 ${prevTime} 投過票了！`);
+        return;
+    }
+    
+    const nVotes = { ...existingVotes };
+    nVotes[voter] = { ...selectedScores, time: new Date().toLocaleString() };
+    await cloudAction({ action: 'updateVote', id: currentRatingProjectId.toString(), votes: nVotes });
+    closeRatingModal();
+}
 
         async function deleteProject(id) { if (confirm("確定刪除？")) await cloudAction({ action: 'delete', id: id.toString() }); }
         
