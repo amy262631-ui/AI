@@ -112,6 +112,96 @@
             background: var(--game-purple) !important;
             border-color: #ffffff !important;
         }
+/* ── 分析面板樣式 ── */
+#analysisPanel {
+    display: none;
+    animation: fadeSlideIn 0.4s ease;
+}
+#analysisPanel.visible { display: block; }
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.analysis-tab-btn {
+    padding: 0.6rem 1.4rem;
+    border-radius: 999px;
+    font-weight: 900;
+    font-size: 0.9rem;
+    border: 2px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.analysis-tab-btn.active {
+    background: var(--game-purple);
+    color: white;
+    border-color: var(--game-purple);
+    box-shadow: 0 4px 0px #4a00aa;
+}
+.analysis-tab-content { display: none; }
+.analysis-tab-content.active { display: block; animation: fadeIn 0.25s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.grade-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 3rem; height: 3rem; border-radius: 1rem;
+    font-size: 1.5rem; font-weight: 900; flex-shrink: 0;
+}
+.grade-S { background: #fef9c3; color: #854d0e; border: 3px solid #fde047; }
+.grade-A { background: #dcfce7; color: #166534; border: 3px solid #86efac; }
+.grade-B { background: #dbeafe; color: #1e40af; border: 3px solid #93c5fd; }
+.grade-C { background: #fff7ed; color: #9a3412; border: 3px solid #fdba74; }
+.grade-D { background: #fce7f3; color: #9d174d; border: 3px solid #f9a8d4; }
+.score-bar-track {
+    height: 8px; background: #f1f5f9; border-radius: 99px; overflow: hidden;
+}
+.score-bar-fill {
+    height: 8px; border-radius: 99px;
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.insight-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 900; white-space: nowrap;
+}
+.chip-danger  { background: #fee2e2; color: #991b1b; }
+.chip-warning { background: #fef3c7; color: #92400e; }
+.chip-success { background: #d1fae5; color: #065f46; }
+.chip-info    { background: #dbeafe; color: #1e40af; }
+.chip-gray    { background: #f1f5f9; color: #475569; }
+.analysis-member-row {
+    display: flex; gap: 16px; align-items: flex-start;
+    padding: 1.2rem 0;
+    border-bottom: 2px dashed #f1f5f9;
+}
+.analysis-member-row:last-child { border-bottom: none; }
+.zombie-card {
+    background: #fff7ed; border: 2px solid #fed7aa;
+    border-radius: 1.5rem; padding: 1.2rem 1.5rem;
+    display: flex; flex-direction: column; gap: 8px;
+}
+.zombie-card.severe { background: #fef2f2; border-color: #fecaca; }
+.voter-ratio-bar {
+    height: 12px; border-radius: 99px;
+    background: #e0e7ff; overflow: hidden; position: relative;
+}
+.voter-ratio-given {
+    position: absolute; left: 0; top: 0; height: 12px;
+    background: var(--game-purple); border-radius: 99px;
+    transition: width 0.8s ease;
+}
+.summary-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px; margin-bottom: 1.5rem;
+}
+.summary-stat {
+    background: white; border-radius: 1.2rem;
+    padding: 1rem; text-align: center; border: 2px solid #f1f5f9;
+}
+.summary-stat .stat-number { font-size: 2rem; font-weight: 900; }
+.summary-stat .stat-label  { font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
     </style>
 </head>
 <body class="min-h-screen py-6 md:py-10 px-4 md:px-6 text-slate-800">
@@ -172,6 +262,64 @@
 
             <!-- 主看板區 -->
             <main class="lg:col-span-9 space-y-16 md:space-y-24 order-1 lg:order-2">
+<!-- ════════════════ 成員行為分析面板 ════════════════ -->
+<div id="analysisPanel">
+    <div class="adventure-card p-6 md:p-10 border-b-[10px] border-b-purple-100 shadow-2xl">
+
+        <!-- 面板標題 -->
+        <div class="flex flex-wrap items-center gap-4 mb-8">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-content-center flex-shrink-0 flex justify-center">
+                    <i class="fas fa-chart-pie text-white text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl md:text-4xl font-black text-slate-900 italic tracking-tighter">成員行為分析</h2>
+                    <p class="text-purple-500 font-black text-sm uppercase tracking-widest">管理員專用 · 即時計算</p>
+                </div>
+            </div>
+            <span class="ml-auto bg-purple-600 text-white text-xs font-black px-4 py-2 rounded-full uppercase tracking-widest">🔐 Admin Only</span>
+        </div>
+
+        <!-- 整體統計速覽 -->
+        <div id="analysisSummaryStats" class="summary-stat-grid"></div>
+
+        <!-- 分頁標籤 -->
+        <div class="flex flex-wrap gap-3 mb-8 no-scrollbar overflow-x-auto">
+            <button class="analysis-tab-btn active" onclick="switchAnalysisTab('zombie', this)">🧟 殭屍任務</button>
+            <button class="analysis-tab-btn" onclick="switchAnalysisTab('voter', this)">⚡ 投票行為</button>
+            <button class="analysis-tab-btn" onclick="switchAnalysisTab('engagement', this)">🏆 參與評級</button>
+        </div>
+
+        <!-- 殭屍任務 -->
+        <div id="analysis-tab-zombie" class="analysis-tab-content active">
+            <div class="flex items-start gap-3 bg-orange-50 border-2 border-orange-200 rounded-2xl p-4 mb-6">
+                <i class="fas fa-exclamation-triangle text-orange-500 mt-1 flex-shrink-0"></i>
+                <div class="text-sm font-bold text-orange-800">偵測條件：任務狀態非「達成/完成」，且截止日已超過 <strong>14 天</strong>。逾期 &gt;30 天標記嚴重，14–30 天標記警告。</div>
+            </div>
+            <div id="zombieList" class="space-y-4"></div>
+        </div>
+
+        <!-- 投票行為 -->
+        <div id="analysis-tab-voter" class="analysis-tab-content">
+            <div class="flex items-start gap-3 bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 mb-6">
+                <i class="fas fa-info-circle text-blue-500 mt-1 flex-shrink-0"></i>
+                <div class="text-sm font-bold text-blue-800">統計「給出奧援次數」vs「收到奧援次數」，計算貢獻比值。比值 &lt;0.3 且收票 &gt;0 者標記為 ⚠️ 只拿不給。</div>
+            </div>
+            <div id="voterList" class="space-y-2"></div>
+        </div>
+
+        <!-- 參與評級 -->
+        <div id="analysis-tab-engagement" class="analysis-tab-content">
+            <div class="flex items-start gap-3 bg-purple-50 border-2 border-purple-200 rounded-2xl p-4 mb-6">
+                <i class="fas fa-star text-purple-500 mt-1 flex-shrink-0"></i>
+                <div class="text-sm font-bold text-purple-800">綜合評分 = 完成率 ×40% ＋ 奧援貢獻 ×30% ＋ 被評作品品質 ×30%。S≥80 · A≥65 · B≥50 · C≥35 · D&lt;35。</div>
+            </div>
+            <div id="engagementList" class="space-y-4"></div>
+        </div>
+
+    </div>
+</div>
+<!-- ════════════════ 分析面板結束 ════════════════ -->
                 <div>
                     <div class="flex flex-col sm:flex-row justify-between items-center sm:items-end mb-8 md:mb-12 px-2 md:px-6 gap-4">
                         <h2 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter italic flex items-center text-nowrap">
@@ -384,6 +532,187 @@
             }).join('');
         }
 
+/* ════════════ 成員行為分析函式 ════════════ */
+
+function detectZombieTasks(data) {
+    const now = Date.now();
+    const THRESHOLD = 14 * 86400000;
+    return data
+        .filter(item => {
+            const done = (item.status||'').includes('達成') || (item.status||'').includes('完成');
+            if (done) return false;
+            const dl = new Date(item.deadline).getTime();
+            return !isNaN(dl) && (now - dl) > THRESHOLD;
+        })
+        .map(item => ({
+            id: item.id, name: item.name, topic: item.topic,
+            overdueDays: Math.floor((now - new Date(item.deadline).getTime()) / 86400000),
+            voteCount: Object.keys(item.votes||{}).length,
+            status: item.status || '🚀 正在起飛'
+        }))
+        .sort((a, b) => b.overdueDays - a.overdueDays);
+}
+
+function analyzeVotingBehavior(data) {
+    const given = {}, received = {};
+    const allNames = [...new Set(data.map(i => i.name))];
+    allNames.forEach(n => { given[n] = 0; received[n] = 0; });
+    data.forEach(item => {
+        Object.keys(item.votes||{}).forEach(voter => {
+            given[voter] = (given[voter] || 0) + 1;
+            received[item.name] = (received[item.name] || 0) + 1;
+        });
+    });
+    return allNames.map(name => ({
+        name,
+        given: given[name] || 0,
+        received: received[name] || 0,
+        ratio: (received[name]||0) > 0 ? ((given[name]||0) / (received[name]||0)) : null
+    })).sort((a, b) => (b.given - a.given) || (a.received - b.received));
+}
+
+function calcEngagementScore(data) {
+    const stats = {};
+    data.forEach(item => {
+        const n = item.name;
+        if (!stats[n]) stats[n] = { total: 0, done: 0, votesGiven: 0, qSum: 0, qCount: 0 };
+        stats[n].total++;
+        if ((item.status||'').includes('達成') || (item.status||'').includes('完成')) stats[n].done++;
+        Object.values(item.votes||{}).forEach(v => {
+            stats[n].qSum += (+v.logic + +v.utility + +v.innovation);
+            stats[n].qCount += 3;
+        });
+    });
+    data.forEach(item => {
+        Object.keys(item.votes||{}).forEach(voter => {
+            if (stats[voter]) stats[voter].votesGiven++;
+        });
+    });
+    const maxVotes = Math.max(...Object.values(stats).map(s => s.votesGiven), 1);
+    return Object.entries(stats).map(([name, s]) => {
+        const completion   = s.total > 0 ? s.done / s.total : 0;
+        const contribution = s.votesGiven / maxVotes;
+        const quality      = s.qCount > 0 ? (s.qSum / s.qCount) / 5 : 0;
+        const score = Math.round((completion * 0.4 + contribution * 0.3 + quality * 0.3) * 100);
+        const grade = score >= 80 ? 'S' : score >= 65 ? 'A' : score >= 50 ? 'B' : score >= 35 ? 'C' : 'D';
+        return {
+            name, score, grade,
+            completionPct:   Math.round(completion * 100),
+            contributionPct: Math.round(contribution * 100),
+            qualityPct:      Math.round(quality * 100),
+            done: s.done, total: s.total, votesGiven: s.votesGiven
+        };
+    }).sort((a, b) => b.score - a.score);
+}
+
+function renderAnalysis(data) {
+    const zombies   = detectZombieTasks(data);
+    const voterData = analyzeVotingBehavior(data);
+    const engageData = calcEngagementScore(data);
+    const allNames = [...new Set(data.map(i => i.name))];
+    const neverVoted = voterData.filter(v => v.given === 0).length;
+    const completedCount = data.filter(i => (i.status||'').includes('達成') || (i.status||'').includes('完成')).length;
+    const completionRate = data.length > 0 ? Math.round(completedCount / data.length * 100) : 0;
+
+    document.getElementById('analysisSummaryStats').innerHTML = `
+        <div class="summary-stat"><div class="stat-number text-purple-600">${allNames.length}</div><div class="stat-label">成員總數</div></div>
+        <div class="summary-stat"><div class="stat-number text-red-500">${zombies.length}</div><div class="stat-label">殭屍任務</div></div>
+        <div class="summary-stat"><div class="stat-number text-orange-500">${neverVoted}</div><div class="stat-label">從未投票</div></div>
+        <div class="summary-stat"><div class="stat-number text-emerald-600">${completionRate}%</div><div class="stat-label">整體完成率</div></div>
+        <div class="summary-stat"><div class="stat-number text-blue-600">${engageData.filter(e => e.grade==='S'||e.grade==='A').length}</div><div class="stat-label">S/A 級成員</div></div>
+    `;
+
+    // 殭屍任務
+    const zombieEl = document.getElementById('zombieList');
+    if (zombies.length === 0) {
+        zombieEl.innerHTML = `<div class="text-center py-10 text-emerald-600 font-black text-xl bg-emerald-50 rounded-2xl border-2 border-emerald-200">🎉 目前沒有殭屍任務！</div>`;
+    } else {
+        zombieEl.innerHTML = zombies.map(z => {
+            const severe = z.overdueDays > 30;
+            return `<div class="zombie-card ${severe ? 'severe' : ''}">
+                <div class="flex flex-wrap items-center gap-3 justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl">${severe ? '💀' : '🧟'}</span>
+                        <span class="font-black text-slate-800 text-lg">@${z.name}</span>
+                        <span class="${severe ? 'chip-danger' : 'chip-warning'} insight-chip">逾期 ${z.overdueDays} 天</span>
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        ${z.voteCount > 0 ? `<span class="insight-chip chip-info">已獲 ${z.voteCount} 票</span>` : `<span class="insight-chip chip-gray">尚無奧援</span>`}
+                        ${severe ? `<span class="insight-chip chip-danger">🚨 嚴重逾期</span>` : `<span class="insight-chip chip-warning">⚠️ 輕微逾期</span>`}
+                    </div>
+                </div>
+                <div class="text-slate-700 font-bold text-sm pl-10">「${z.topic}」</div>
+                <div class="text-slate-400 font-bold text-xs pl-10">${z.status}</div>
+            </div>`;
+        }).join('');
+    }
+
+    // 投票行為
+    const maxGiven = Math.max(...voterData.map(v => v.given), 1);
+    document.getElementById('voterList').innerHTML = voterData.map(v => {
+        const isLeech = v.given === 0 && v.received > 0;
+        const isHero  = v.given >= 3;
+        const barW    = Math.round((v.given / maxGiven) * 100);
+        let tag = isLeech ? `<span class="insight-chip chip-danger">⚠️ 只拿不給</span>`
+                : isHero  ? `<span class="insight-chip chip-success">⭐ 奧援英雄</span>`
+                : v.given === 0 ? `<span class="insight-chip chip-gray">尚未投票</span>`
+                : `<span class="insight-chip chip-info">正常參與</span>`;
+        return `<div class="analysis-member-row">
+            <div style="min-width:120px">
+                <div class="font-black text-slate-800">@${v.name}</div>
+                <div class="text-xs text-slate-400 font-bold mt-1">${tag}</div>
+            </div>
+            <div class="flex-1">
+                <div class="flex justify-between text-xs font-black text-slate-400 mb-1">
+                    <span>給出 <span class="text-purple-600 text-sm">${v.given}</span> 票</span>
+                    <span>收到 <span class="text-pink-500 text-sm">${v.received}</span> 票</span>
+                    <span>比值 <span class="${isLeech ? 'text-red-500' : 'text-emerald-600'} text-sm">${v.ratio !== null ? v.ratio.toFixed(2) : 'N/A'}</span></span>
+                </div>
+                <div class="voter-ratio-bar"><div class="voter-ratio-given" style="width:${barW}%"></div></div>
+            </div>
+        </div>`;
+    }).join('');
+
+    // 參與評級
+    const barColors = { completion: '#10b981', contribution: '#7000ff', quality: '#3b82f6' };
+    document.getElementById('engagementList').innerHTML = engageData.map((e, idx) => {
+        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '';
+        return `<div class="bg-white rounded-2xl border-2 border-slate-100 p-5">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="grade-badge grade-${e.grade}">${e.grade}</div>
+                <div class="flex-1">
+                    <div class="font-black text-slate-800 text-lg">${medal} @${e.name}</div>
+                    <div class="text-xs text-slate-400 font-bold">綜合得分 ${e.score} 分</div>
+                </div>
+                <div class="text-right text-xs font-black text-slate-400">
+                    <div>完成 ${e.done}/${e.total} 任務</div>
+                    <div>給出 ${e.votesGiven} 票奧援</div>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <div>
+                    <div class="flex justify-between text-xs font-black text-slate-400 mb-1"><span>完成率</span><span>${e.completionPct}%</span></div>
+                    <div class="score-bar-track"><div class="score-bar-fill" style="width:${e.completionPct}%;background:${barColors.completion}"></div></div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs font-black text-slate-400 mb-1"><span>奧援貢獻</span><span>${e.contributionPct}%</span></div>
+                    <div class="score-bar-track"><div class="score-bar-fill" style="width:${e.contributionPct}%;background:${barColors.contribution}"></div></div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs font-black text-slate-400 mb-1"><span>作品品質</span><span>${e.qualityPct}%</span></div>
+                    <div class="score-bar-track"><div class="score-bar-fill" style="width:${e.qualityPct}%;background:${barColors.quality}"></div></div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function switchAnalysisTab(name, btn) {
+    document.querySelectorAll('.analysis-tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.analysis-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('analysis-tab-' + name).classList.add('active');
+    btn.classList.add('active');
+}
         document.getElementById('aiForm').onsubmit = async (e) => {
             e.preventDefault();
             await cloudAction({ action: 'create', id: Date.now().toString(), name: document.getElementById('name').value.trim(), topic: document.getElementById('topic').value.trim(), link: '', startDate: document.getElementById('startDate').value, deadline: document.getElementById('deadline').value, status: '🚀 正在起飛' });
@@ -439,8 +768,18 @@
             isAdminView = !isAdminView;
             const btn = document.getElementById('adminBtn');
             btn.classList.toggle('btn-admin-unlocked', isAdminView);
-            btn.innerHTML = isAdminView ? `<i class="fas fa-lock-open mr-2"></i> 管理員模式: 解鎖` : `<i class="fas fa-user-shield mr-2"></i> 管理員模式`;
-            updateUI(); 
+           btn.innerHTML = isAdminView ? `<i class="fas fa-lock-open mr-2"></i> 管理員模式: 解鎖` : `<i class="fas fa-user-shield mr-2"></i> 管理員模式`;
+
+            // 顯示／隱藏分析面板
+            const panel = document.getElementById('analysisPanel');
+            if (isAdminView) {
+                panel.classList.add('visible');
+                renderAnalysis(globalData);
+            } else {
+                panel.classList.remove('visible');
+            }
+
+            updateUI();
             showLoading(false);
         }
 
