@@ -573,8 +573,10 @@ function analyzeVotingBehavior(data) {
 
 function calcEngagementScore(data) {
     const stats = {};
-    const CONFIDENCE_THRESHOLD = 3; // 設定信心閾值：收到 3 票以上才不扣分
+    const TASK_GOAL = 5; // 公平性門檻：完成 5 個任務視為高產量貢獻
+    const VOTE_GOAL = 5; // 公平性門檻：收到 5 票奧援視為數據具公信力
 
+    // 1. 收集基礎數據
     data.forEach(item => {
         const n = item.name;
         if (!stats[n]) stats[n] = { total: 0, done: 0, votesGiven: 0, qSum: 0, qCount: 0, votesReceivedCount: 0 };
@@ -586,36 +588,41 @@ function calcEngagementScore(data) {
         votes.forEach(v => {
             stats[n].qSum += (+v.logic + +v.utility + +v.innovation);
             stats[n].qCount += 3;
-            stats[n].votesReceivedCount++; // 紀錄實際收到的投票人數
+            stats[n].votesReceivedCount++; 
         });
     });
 
-    data.forEach(item => {
-        Object.keys(item.votes || {}).forEach(voter => {
-            if (stats[voter]) stats[voter].votesGiven++;
-        });
-    });
+    // 2. 計算奧援貢獻
+    const maxVotesGiven = Math.max(...Object.values(stats).map(s => s.votesGiven), 1);
 
-    const maxVotes = Math.max(...Object.values(stats).map(s => s.votesGiven), 1);
-
+    // 3. 核心公平性評分邏輯
     return Object.entries(stats).map(([name, s]) => {
+        // A. 完成率 (40% 權重已固定)
         const completion = s.total > 0 ? s.done / s.total : 0;
-        const contribution = s.votesGiven / maxVotes;
         
-        // --- 核心逻辑修改：加入信心加權 ---
-        const rawQuality = s.qCount > 0 ? (s.qSum / s.qCount) / 5 : 0;
-        // 信心係數：如果收票少於門檻，會按比例打折 (例如只有 1 票則信心為 1/3)
-        const confidence = s.votesReceivedCount >= CONFIDENCE_THRESHOLD ? 1 : (s.votesReceivedCount / CONFIDENCE_THRESHOLD);
-        const quality = rawQuality * confidence;
+        // B. 奧援貢獻 (30% 權重已固定)
+        const contribution = s.votesGiven / maxVotesGiven;
         
-        const score = Math.round((completion * 0.4 + contribution * 0.3 + quality * 0.3) * 100);
+        // C. 作品品質加權計算 (30% 權重)
+        // c1. 基礎星數得分 (0~1)
+        const rawAvgQuality = s.qCount > 0 ? (s.qSum / s.qCount) / 5 : 0;
+        // c2. 數量加成：鼓勵多產 (最高 1.0)
+        const quantityBonus = Math.min(s.done / TASK_GOAL, 1);
+        // c3. 信心修正：鼓勵獲得更多人認可 (最高 1.0)
+        const confidence = Math.min(s.votesReceivedCount / VOTE_GOAL, 1);
+        
+        // 公平性公式：(平均品質 * 0.7) + (產量加成 * 0.2) + (公信力加成 * 0.1)
+        const fairQuality = (rawAvgQuality * 0.7) + (quantityBonus * 0.2) + (confidence * 0.1);
+        
+        // 最終綜合得分
+        const score = Math.round((completion * 0.4 + contribution * 0.3 + fairQuality * 0.3) * 100);
         const grade = score >= 80 ? 'S' : score >= 65 ? 'A' : score >= 50 ? 'B' : score >= 35 ? 'C' : 'D';
 
         return {
             name, score, grade,
             completionPct: Math.round(completion * 100),
             contributionPct: Math.round(contribution * 100),
-            qualityPct: Math.round(quality * 100), // 這邊會反映出加權後的結果
+            qualityPct: Math.round(fairQuality * 100),
             done: s.done, total: s.total, votesGiven: s.votesGiven
         };
     }).sort((a, b) => b.score - a.score);
