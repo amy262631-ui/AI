@@ -202,6 +202,33 @@
 }
 .summary-stat .stat-number { font-size: 2rem; font-weight: 900; }
 .summary-stat .stat-label  { font-size: 0.75rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+        /* 新增：排行榜任務清單樣式 */
+.user-task-link {
+    display: block;
+    padding: 0.5rem 1rem;
+    margin-top: 0.5rem;
+    background: #f8fafc;
+    border-left: 4px solid var(--game-purple);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.user-task-link:hover {
+    background: var(--game-purple);
+    color: white;
+    transform: translateX(5px);
+}
+.task-dropdown {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+.task-dropdown.open {
+    max-height: 500px;
+    margin-top: 1rem;
+}
     </style>
 </head>
 <body class="min-h-screen py-6 md:py-10 px-4 md:px-6 text-slate-800">
@@ -425,116 +452,124 @@
             renderProjects(globalData); renderSummary(globalData);
         }
 
-        function renderProjects(items) {
-            const list = document.getElementById('projectList');
-            if (items.length === 0) { list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-2xl bg-white/30 rounded-[2rem] border-4 border-dashed border-slate-200 text-nowrap text-balance">讀取冒險日誌中...</div>'; return; }
-            list.innerHTML = [...items].reverse().map(item => {
-                const voters = Object.keys(item.votes || {}), vCount = voters.length;
-                let sum = 0; voters.forEach(v => sum += (Number(item.votes[v].logic) + Number(item.votes[v].utility) + Number(item.votes[v].innovation)));
-                const avg = vCount > 0 ? (sum / (vCount * 3)).toFixed(1) : '0.0';
-                const isCompleted = (item.status || "").includes('達成') || (item.status || "").includes('完成');
+       function renderProjects(items) {
+    const list = document.getElementById('projectList');
+    if (items.length === 0) { list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-2xl bg-white/30 rounded-[2rem] border-4 border-dashed border-slate-200 text-nowrap text-balance">讀取冒險日誌中...</div>'; return; }
+    
+    list.innerHTML = [...items].reverse().map(item => {
+        const voters = Object.keys(item.votes || {}), vCount = voters.length;
+        let sum = 0; voters.forEach(v => sum += (Number(item.votes[v].logic) + Number(item.votes[v].utility) + Number(item.votes[v].innovation)));
+        const avg = vCount > 0 ? (sum / (vCount * 3)).toFixed(1) : '0.0';
+        const isCompleted = (item.status || "").includes('達成') || (item.status || "").includes('完成');
 
-                return `
-                <div class="adventure-card p-6 md:p-10 border-2 border-white group">
-                    <div class="flex flex-col lg:flex-row justify-between items-start gap-8">
-                        <div class="flex-1 space-y-6 w-full min-w-0 overflow-visible">
-                            <!-- MISSION 標籤與時間 -->
-                            <div class="flex flex-wrap items-center gap-2 text-nowrap">
-                                <span class="px-3 py-1 bg-purple-600 text-white rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest text-nowrap">MISSION #${item.id.toString().slice(-4)}</span>
-                                <div class="text-xs md:text-lg text-slate-500 font-black bg-white/80 px-4 py-1.5 rounded-full border border-slate-100 shadow-sm flex items-center whitespace-nowrap text-nowrap text-nowrap">
-                                    <i class="far fa-clock mr-2 text-purple-500 text-nowrap"></i>${formatDate(item.startdate)} ➔ ${formatDate(item.deadline)}
-                                    ${getRemainingDaysLabel(item.deadline, item.status)}
-                                </div>
-                            </div>
-                            
-                            <!-- 任務主題 (強制單行，不縮減) -->
-                            <div class="overflow-visible">
-                                <h3 class="text-2xl md:text-4xl text-slate-800 italic uppercase leading-tight tracking-tighter topic-title">
-                                    ${item.topic}
-                                </h3>
-                            </div>
-
-                            <!-- 冒險者、EXP 分數與朝聖按鈕 (並排顯示) -->
-                            <div class="flex flex-wrap items-center gap-6">
-                                <span class="hero-title-font text-purple-600 italic flex items-center bg-white px-5 py-2 rounded-2xl shadow-sm border-2 border-purple-50 text-nowrap text-nowrap">
-                                    <i class="fas fa-user-ninja mr-3 text-nowrap text-nowrap"></i>@${item.name}
-                                </span>
-                                <div class="flex flex-wrap items-center gap-4">
-    <div class="bg-slate-900 text-white px-6 py-2 rounded-[2rem] border-4 border-slate-800 shadow-xl">
-        <div class="flex items-center hero-title-font tracking-tighter text-cyan-400 text-nowrap">
-            <i class="fas fa-star mr-2 text-yellow-400"></i>EXP: ${avg}
-        </div>
-    </div>
-    ${vCount > 0 ? `
-        <div class="flex flex-wrap items-center gap-2">
-            <span class="text-xs font-black text-slate-400 uppercase tracking-widest text-nowrap">奧援者：</span>
-            ${voters.map(v => `
-                <span class="inline-flex items-center gap-1 bg-purple-50 border-2 border-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-xs font-black text-nowrap">
-                    <i class="fas fa-bolt text-yellow-400" style="font-size:10px"></i>${v}
-                </span>
-            `).join('')}
-        </div>
-    ` : `<span class="text-xs font-black text-slate-300 italic">尚無奧援</span>`}
-    ${item.link ? `<a href="${item.link}" target="_blank" class="btn-showcase-inline">朝聖成果 <i class="fas fa-external-link-alt ml-1"></i></a>` : ''}
-</div>
-                            </div>
-                        </div>
-                        
-                        <!-- 右側控制按鈕 -->
-                        <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto lg:min-w-[400px] justify-end pt-6 lg:pt-0 border-t lg:border-t-0 border-slate-100 text-nowrap">
-                            <span class="w-full sm:w-auto text-center px-8 py-4 rounded-2xl text-lg font-black border-b-4 shadow-lg ${getStatusClass(item.status)} text-nowrap">
-                                ${item.status || '🚀 正在起飛'}
-                            </span>
-                            <div class="flex flex-wrap gap-2 justify-center text-nowrap">
-                                <button onclick="toggleStatus('${item.id}')" title="切換進度" class="p-5 bg-white text-slate-400 rounded-2xl border-2 border-slate-100 btn-game text-nowrap"><i class="fas fa-sync-alt text-2xl text-nowrap"></i></button>
-                                <button onclick="updateProjectLink('${item.id}')" title="連結管理" class="p-5 bg-white text-purple-600 rounded-2xl border-2 border-slate-100 btn-game text-nowrap"><i class="fas fa-link text-2xl text-nowrap text-nowrap text-nowrap"></i></button>
-                                ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-2xl font-black text-xl btn-game pulse-soft text-nowrap text-nowrap text-nowrap">奧援 ⚡</button>` : ''}
-                                <button onclick="deleteProject('${item.id}')" class="p-5 bg-white text-slate-200 hover:text-red-500 rounded-2xl border-2 border-slate-100 btn-game text-nowrap text-nowrap text-nowrap text-nowrap text-nowrap"><i class="far fa-trash-alt text-2xl text-nowrap"></i></button>
-                            </div>
+        // --- 核心修正：在外層 div 加入 id="task-card-${item.id}" ---
+        return `
+        <div id="task-card-${item.id}" class="adventure-card p-6 md:p-10 border-2 border-white group transition-all duration-500">
+            <div class="flex flex-col lg:flex-row justify-between items-start gap-8">
+                <div class="flex-1 space-y-6 w-full min-w-0 overflow-visible">
+                    <div class="flex flex-wrap items-center gap-2 text-nowrap">
+                        <span class="px-3 py-1 bg-purple-600 text-white rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest text-nowrap">MISSION #${item.id.toString().slice(-4)}</span>
+                        <div class="text-xs md:text-lg text-slate-500 font-black bg-white/80 px-4 py-1.5 rounded-full border border-slate-100 shadow-sm flex items-center whitespace-nowrap text-nowrap">
+                            <i class="far fa-clock mr-2 text-purple-500"></i>${formatDate(item.startdate)} ➔ ${formatDate(item.deadline)}
+                            ${getRemainingDaysLabel(item.deadline, item.status)}
                         </div>
                     </div>
-
-                    <!-- 管理員專用：詳細評分日誌 -->
-                    <div class="${isAdminView ? 'block' : 'hidden'} mt-10 pt-10 border-t-4 border-dashed border-slate-100 animate-in fade-in">
-                        <p class="w-full text-lg font-black text-slate-400 uppercase tracking-[0.4em] mb-6">奧援歷史日誌 (管理員專用)</p>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-nowrap text-nowrap">
-                            ${vCount > 0 ? voters.map(v => `
-                                <div class="bg-white p-6 rounded-[2rem] border-4 border-slate-50 shadow-sm flex flex-col gap-3">
-                                    <div class="flex justify-between items-center border-b-2 border-slate-50 pb-3">
-                                        <span class="text-purple-600 text-2xl font-black italic text-nowrap">@${v}</span>
-                                        <span class="text-slate-300 text-sm font-mono text-nowrap">${item.votes[v].time || ''}</span>
-                                    </div>
-                                    <div class="flex gap-4 text-lg font-black text-slate-400 italic text-nowrap text-nowrap text-nowrap">
-                                        <span class="bg-purple-50 px-3 py-1 rounded-xl text-nowrap text-nowrap">L: ${item.votes[v].logic}</span>
-                                        <span class="bg-emerald-50 px-3 py-1 rounded-xl text-nowrap text-nowrap">U: ${item.votes[v].utility}</span>
-                                        <span class="bg-orange-50 px-3 py-1 rounded-xl text-nowrap text-nowrap">I: ${item.votes[v].innovation}</span>
-                                    </div>
+                    <div class="overflow-visible">
+                        <h3 class="text-2xl md:text-4xl text-slate-800 italic uppercase leading-tight tracking-tighter topic-title">${item.topic}</h3>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-6">
+                        <span class="hero-title-font text-purple-600 italic flex items-center bg-white px-5 py-2 rounded-2xl shadow-sm border-2 border-purple-50 text-nowrap">
+                            <i class="fas fa-user-ninja mr-3"></i>@${item.name}
+                        </span>
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div class="bg-slate-900 text-white px-6 py-2 rounded-[2rem] border-4 border-slate-800 shadow-xl">
+                                <div class="flex items-center hero-title-font tracking-tighter text-cyan-400 text-nowrap">
+                                    <i class="fas fa-star mr-2 text-yellow-400"></i>EXP: ${avg}
                                 </div>
-                            `).join('') : '<p class="text-slate-400 italic text-2xl px-4 text-nowrap">尚無評分數據。</p>'}
+                            </div>
+                            ${item.link ? `<a href="${item.link}" target="_blank" class="btn-showcase-inline">朝聖成果 <i class="fas fa-external-link-alt ml-1"></i></a>` : ''}
                         </div>
                     </div>
-                </div>`;
-            }).join('');
-        }
-
+                </div>
+                <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto lg:min-w-[400px] justify-end pt-6 lg:pt-0 border-t lg:border-t-0 border-slate-100 text-nowrap">
+                    <span class="w-full sm:w-auto text-center px-8 py-4 rounded-2xl text-lg font-black border-b-4 shadow-lg ${getStatusClass(item.status)} text-nowrap">${item.status || '🚀 正在起飛'}</span>
+                    <div class="flex flex-wrap gap-2 justify-center text-nowrap">
+                        <button onclick="toggleStatus('${item.id}')" class="p-5 bg-white text-slate-400 rounded-2xl border-2 border-slate-100 btn-game"><i class="fas fa-sync-alt text-2xl"></i></button>
+                        <button onclick="updateProjectLink('${item.id}')" class="p-5 bg-white text-purple-600 rounded-2xl border-2 border-slate-100 btn-game"><i class="fas fa-link text-2xl"></i></button>
+                        ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-2xl font-black text-xl btn-game pulse-soft">奧援 ⚡</button>` : ''}
+                        <button onclick="deleteProject('${item.id}')" class="p-5 bg-white text-slate-200 hover:text-red-500 rounded-2xl border-2 border-slate-100 btn-game"><i class="far fa-trash-alt text-2xl"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
         function renderSummary(items) {
-            const stats = {};
-            items.forEach(item => {
-                const n = item.name || "勇者"; if (!stats[n]) stats[n] = { total: 0, logic: 0, utility: 0, innovation: 0, vCount: 0 };
-                if ((item.status || "").includes('達成')) stats[n].total++;
-                Object.values(item.votes || {}).forEach(v => { stats[n].logic += Number(v.logic); stats[n].utility += Number(v.utility); stats[n].innovation += Number(v.innovation); stats[n].vCount++; });
-            });
-            const sorted = Object.keys(stats).sort((a,b) => {
-                const p = (n) => (stats[n].vCount > 0 ? (stats[n].logic + stats[n].utility + stats[n].innovation) / (stats[n].vCount * 3) : 0) + (stats[n].total * 0.2);
-                return p(b) - p(a);
-            });
-            document.getElementById('summaryTableBody').innerHTML = sorted.map((name, idx) => {
-                const s = stats[name];
-                const totalPower = ((s.vCount > 0 ? (s.logic + s.utility + s.innovation) / (s.vCount * 3) : 0) + (s.total * 0.2)).toFixed(1);
-                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '👤';
-                return `<tr class="border-b border-slate-50"><td class="px-6 py-10 md:px-10 font-black text-3xl name-cell italic text-nowrap text-nowrap text-nowrap"><span class="mr-4 md:mr-8 inline-block transform group-hover:rotate-12 transition-transform text-nowrap text-nowrap">${medal}</span>@${name}</td><td class="px-4 md:px-6 py-8 md:py-12 text-center text-purple-500 font-black text-2xl md:text-4xl italic text-nowrap text-nowrap">+${(s.total * 0.2).toFixed(1)}</td><td class="px-4 md:px-6 py-8 md:py-12 text-center text-slate-400 font-black text-2xl md:text-4xl font-mono text-nowrap text-nowrap">${s.vCount}</td><td class="px-6 md:px-12 py-8 md:py-12 text-right text-nowrap text-nowrap text-nowrap text-nowrap text-nowrap"><span class="achievement-score font-mono shadow-sm bg-white px-4 md:px-8 py-2 md:py-4 rounded-[1.5rem] md:rounded-[3rem] border-2 md:border-4 border-purple-50 italic text-nowrap text-nowrap">${totalPower}</span></td></tr>`;
-            }).join('');
-        }
+    // 依據新權重：50/40/10 計算戰力 (調用 calcEngagementScore 獲取排序)
+    const engageData = calcEngagementScore(items);
+    
+    document.getElementById('summaryTableBody').innerHTML = engageData.map((e, idx) => {
+        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '👤';
+        
+        // 過濾出該勇者的所有任務
+        const userTasks = items.filter(item => (item.name || "").trim() === e.name.trim());
+
+        return `
+        <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+            <td class="px-6 py-8 md:px-10">
+                <div class="cursor-pointer group" onclick="toggleUserTasks('${e.name}')">
+                    <div class="font-black text-2xl md:text-3xl italic text-slate-800">
+                        <span class="mr-4 inline-block group-hover:scale-110 transition-transform">${medal}</span>@${e.name}
+                        <i class="fas fa-chevron-down ml-2 text-sm text-slate-300"></i>
+                    </div>
+                </div>
+                <!-- 隱藏的任務下拉選單 -->
+                <div id="tasks-${e.name}" class="task-dropdown">
+                    <p class="text-xs font-black text-slate-400 uppercase mb-2">點擊跳轉至任務：</p>
+                    ${userTasks.map(t => `
+                        <div class="user-task-link font-bold" onclick="jumpToTask('${t.id}')">
+                            <i class="fas fa-rocket mr-2"></i>${t.topic}
+                        </div>
+                    `).join('')}
+                </div>
+            </td>
+            <td class="px-4 text-center text-purple-500 font-black text-2xl italic">+${(e.score * 0.5).toFixed(1)}</td>
+            <td class="px-4 text-center text-slate-400 font-black text-2xl font-mono">${e.votesGiven}</td>
+            <td class="px-6 md:px-12 py-8 text-right">
+                <span class="achievement-score font-mono italic">${e.score}</span>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+// 新增：切換顯示任務清單
+function toggleUserTasks(name) {
+    const el = document.getElementById(`tasks-${name}`);
+    el.classList.toggle('open');
+}
+
+// 新增：跳轉至指定任務位置
+function jumpToTask(id) {
+    // 獲取目標任務卡片元素
+    const taskEl = document.getElementById(`task-card-${id}`);
+    
+    if (taskEl) {
+        // 使用平滑捲動將元素移動到螢幕中心
+        taskEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // 增加視覺高亮效果（紫色環繞光）
+        taskEl.style.borderColor = "#7000ff";
+        taskEl.classList.add('ring-4', 'ring-purple-500', 'ring-opacity-50');
+        
+        // 2 秒後移除高亮效果
+        setTimeout(() => {
+            taskEl.style.borderColor = "#ffffff";
+            taskEl.classList.remove('ring-4', 'ring-purple-500', 'ring-opacity-50');
+        }, 2000);
+    } else {
+        showToast("找不到該任務卡片");
+    }
+}
 
 /* ════════════ 成員行為分析函式 ════════════ */
 
