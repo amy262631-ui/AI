@@ -312,8 +312,11 @@
         <div id="analysis-tab-engagement" class="analysis-tab-content">
             <div class="flex items-start gap-3 bg-purple-50 border-2 border-purple-200 rounded-2xl p-4 mb-6">
                 <i class="fas fa-star text-purple-500 mt-1 flex-shrink-0"></i>
-                <div class="text-sm font-bold text-purple-800">綜合評分 = 完成率 ×40% ＋ 奧援貢獻 ×30% ＋ 被評作品品質 ×30%。S≥80 · A≥65 · B≥50 · C≥35 · D&lt;35。</div>
-            </div>
+                <div class="text-sm font-bold text-purple-800">
+    ⭐ 綜合評分 = 作品數量 ×50% ＋ 作品品質 ×40% ＋ 參與奧援 ×10%。S≥80 · A≥65 · B≥50 · C≥35 · D&lt;35。
+    <br>
+    註：各項分數均以「全場最高者」為動態標竿。
+</div>
             <div id="engagementList" class="space-y-4"></div>
         </div>
 
@@ -573,10 +576,7 @@ function analyzeVotingBehavior(data) {
 
 function calcEngagementScore(data) {
     const stats = {};
-    // 設定產量門檻：完成 6 個作品的人在「作品數量」權重拿滿 50 分
-    const QUANTITY_GOAL = 6; 
-    // 設定公信力門檻：收到 5 票奧援視為高品質認證
-    const VOTE_GOAL = 5; 
+    const VOTE_GOAL = 5; // 品質公信力門檻：收到 5 票奧援視為具備公信力
 
     // 1. 初始化與數據精準累計
     data.forEach(item => {
@@ -588,6 +588,7 @@ function calcEngagementScore(data) {
         }
         
         stats[ownerName].total++;
+        // 判斷是否為完成的作品
         if ((item.status || '').includes('達成') || (item.status || '').includes('完成')) {
             stats[ownerName].done++;
         }
@@ -597,12 +598,12 @@ function calcEngagementScore(data) {
             const voterName = voterRaw.trim();
             const vData = votes[voterRaw];
             
-            // 累計「被投者」的品質數據
+            // 累計「被投者」的品質數據 (用於品質分)
             stats[ownerName].qSum += (+vData.logic + +vData.utility + +vData.innovation);
             stats[ownerName].qCount += 3;
             stats[ownerName].votesReceivedCount++;
 
-            // 累計「投票者」的貢獻度
+            // 核心修正：累計「投票者」的奧援貢獻 (用於奧援分)
             if (!stats[voterName]) {
                 stats[voterName] = { total: 0, done: 0, votesGiven: 0, qSum: 0, qCount: 0, votesReceivedCount: 0 };
             }
@@ -610,22 +611,26 @@ function calcEngagementScore(data) {
         });
     });
 
-    const maxVotesGiven = Math.max(...Object.values(stats).map(s => s.votesGiven), 1);
+    // 2. 獲取動態標竿 (動態計算分母)
+    const allStats = Object.values(stats);
+    const maxDone = Math.max(...allStats.map(s => s.done), 1); // 全場最高產量
+    const maxVotesGiven = Math.max(...allStats.map(s => s.votesGiven), 1); // 全場最高投票數
 
-    // 2. 依照 50/30/20 新權重計算得分
+    // 3. 依照 50 / 40 / 10 動態加權計算
     return Object.entries(stats).map(([name, s]) => {
-        // A. 作品數量權重 (50%) - 獎勵高產量 (最高 50 分)
-        const quantityScore = Math.min(s.done / QUANTITY_GOAL, 1) * 50;
         
-        // B. 作品品質權重 (30%) - 考量星數與受認可程度 (最高 30 分)
+        // A. 作品數量權重 (50%) - 以全場最高產量者為 50 分滿分基準
+        const quantityScore = (s.done / maxDone) * 50;
+        
+        // B. 作品品質權重 (40%) - 平均星數 (80%) + 受認可人數 (20%)
         const avgStarRate = s.qCount > 0 ? (s.qSum / s.qCount) / 5 : 0;
         const confidence = Math.min(s.votesReceivedCount / VOTE_GOAL, 1);
-        const qualityScore = (avgStarRate * 0.8 + confidence * 0.2) * 30;
+        const qualityScore = (avgStarRate * 0.8 + confidence * 0.2) * 40;
         
-        // C. 參與奧援權重 (20%) - 獎勵投票行為 (最高 20 分)
-        const contributionScore = (s.votesGiven / maxVotesGiven) * 20;
+        // C. 參與奧援權重 (10%) - 以全場最高投票數者為 10 分滿分基準
+        const contributionScore = (s.votesGiven / maxVotesGiven) * 10;
         
-        // 總分 = A + B + C (最高 100 分)
+        // 總分加總
         const score = Math.round(quantityScore + qualityScore + contributionScore);
         const grade = score >= 80 ? 'S' : score >= 65 ? 'A' : score >= 50 ? 'B' : score >= 35 ? 'C' : 'D';
 
@@ -633,13 +638,12 @@ function calcEngagementScore(data) {
             name, score, grade,
             completionPct: Math.round((s.done / s.total) * 100 || 0),
             contributionPct: Math.round((s.votesGiven / maxVotesGiven) * 100),
-            // 前端顯示的品質進度條調整為反映「數量+品質」的綜合實力
-            qualityPct: Math.round(((quantityScore + qualityScore) / 80) * 100), 
+            // 進度條視覺化：顯示該成員在「數量+品質」這 90% 權重中的達成進度
+            qualityPct: Math.round(((quantityScore + qualityScore) / 90) * 100), 
             done: s.done, total: s.total, votesGiven: s.votesGiven
         };
     }).sort((a, b) => b.score - a.score);
 }
-
 function renderAnalysis(data) {
     const zombies   = detectZombieTasks(data);
     const voterData = analyzeVotingBehavior(data);
