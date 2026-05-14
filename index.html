@@ -453,57 +453,104 @@
             document.getElementById('projectCount').textContent = globalData.length;
             renderProjects(globalData); renderSummary(globalData);
         }
-
-     function renderProjects(items) {
+function renderProjects(items) {
     const list = document.getElementById('projectList');
-    if (items.length === 0) { list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-2xl bg-white/30 rounded-[2rem] border-4 border-dashed border-slate-200 text-nowrap text-balance">讀取冒險日誌中...</div>'; return; }
+    if (items.length === 0) { 
+        list.innerHTML = '<div class="text-center py-20 text-slate-400 italic text-2xl bg-white/30 rounded-[2rem] border-4 border-dashed border-slate-200">讀取冒險日誌中...</div>'; 
+        return; 
+    }
+    
     list.innerHTML = [...items].reverse().map(item => {
-        const voters = Object.keys(item.votes || {}), vCount = voters.length;
-        let sum = 0; voters.forEach(v => sum += (Number(item.votes[v].logic) + Number(item.votes[v].utility) + Number(item.votes[v].innovation)));
+        const votesObj = item.votes || {};
+        const voters = Object.keys(votesObj);
+        const vCount = voters.length;
+        
+        // 原始計分邏輯
+        let sum = 0; 
+        voters.forEach(v => {
+            const vData = votesObj[v];
+            sum += (Number(vData.logic) + Number(vData.utility) + Number(vData.innovation));
+        });
+        
         const avg = vCount > 0 ? (sum / (vCount * 3)).toFixed(1) : '0.0';
         const isCompleted = (item.status || "").includes('達成') || (item.status || "").includes('完成');
 
-        // --- 核心修正：在外層 div 加入 id="task-card-${item.id}" 供跳轉使用 ---
         return `
+        <!-- 保留 ID 錨點，確保跳轉功能正常 -->
         <div id="task-card-${item.id}" class="adventure-card p-6 md:p-10 border-2 border-white group transition-all duration-300">
             <div class="flex flex-col lg:flex-row justify-between items-start gap-8">
                 <div class="flex-1 space-y-6 w-full min-w-0 overflow-visible">
+                    <!-- MISSION 標籤與時間 -->
                     <div class="flex flex-wrap items-center gap-2 text-nowrap">
-                        <span class="px-3 py-1 bg-purple-600 text-white rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest text-nowrap">MISSION #${item.id.toString().slice(-4)}</span>
-                        <div class="text-xs md:text-lg text-slate-500 font-black bg-white/80 px-4 py-1.5 rounded-full border border-slate-100 shadow-sm flex items-center whitespace-nowrap text-nowrap">
-                            <i class="far fa-clock mr-2 text-purple-500 text-nowrap"></i>${formatDate(item.startdate)} ➔ ${formatDate(item.deadline)}
+                        <span class="px-3 py-1 bg-purple-600 text-white rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest">MISSION #${item.id.toString().slice(-4)}</span>
+                        <div class="text-xs md:text-lg text-slate-500 font-black bg-white/80 px-4 py-1.5 rounded-full border border-slate-100 shadow-sm flex items-center whitespace-nowrap">
+                            <i class="far fa-clock mr-2 text-purple-500"></i>${formatDate(item.startdate)} ➔ ${formatDate(item.deadline)}
                             ${getRemainingDaysLabel(item.deadline, item.status)}
                         </div>
                     </div>
+
+                    <!-- 任務主題 -->
                     <div class="overflow-visible">
-                        <h3 class="text-2xl md:text-4xl text-slate-800 italic uppercase leading-tight tracking-tighter topic-title">
-                            ${item.topic}
-                        </h3>
+                        <h3 class="text-2xl md:text-4xl text-slate-800 italic uppercase leading-tight tracking-tighter topic-title">${item.topic}</h3>
                     </div>
+
+                    <!-- 冒險者、奧援者顯示區 -->
                     <div class="flex flex-wrap items-center gap-6">
-                        <span class="hero-title-font text-purple-600 italic flex items-center bg-white px-5 py-2 rounded-2xl shadow-sm border-2 border-purple-50 text-nowrap">
+                        <span class="hero-title-font text-purple-600 italic flex items-center bg-white px-5 py-2 rounded-2xl shadow-sm border-2 border-purple-50">
                             <i class="fas fa-user-ninja mr-3"></i>@${item.name}
                         </span>
+                        
                         <div class="flex flex-wrap items-center gap-4">
                             <div class="bg-slate-900 text-white px-6 py-2 rounded-[2rem] border-4 border-slate-800 shadow-xl">
-                                <div class="flex items-center hero-title-font tracking-tighter text-cyan-400 text-nowrap">
+                                <div class="flex items-center hero-title-font tracking-tighter text-cyan-400">
                                     <i class="fas fa-star mr-2 text-yellow-400"></i>EXP: ${avg}
                                 </div>
                             </div>
-                            ${item.link ? `<a href="${item.link}" target="_blank" class="btn-showcase-inline">朝聖成果 <i class="fas fa-external-link-alt ml-1"></i></a>` : ''}
+
+                            <!-- ✅ 找回投票人員名字功能 -->
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-xs font-black text-slate-400 uppercase tracking-widest">奧援夥伴：</span>
+                                ${vCount > 0 ? voters.map(v => `
+                                    <span class="inline-flex items-center gap-1 bg-purple-50 border-2 border-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-xs font-black">
+                                        <i class="fas fa-bolt text-yellow-400" style="font-size:10px"></i>${v}
+                                    </span>
+                                `).join('') : `<span class="text-xs font-black text-slate-300 italic">尚無奧援</span>`}
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto lg:min-w-[400px] justify-end pt-6 lg:pt-0 border-t lg:border-t-0 border-slate-100 text-nowrap">
-                    <span class="w-full sm:w-auto text-center px-8 py-4 rounded-2xl text-lg font-black border-b-4 shadow-lg ${getStatusClass(item.status)} text-nowrap">
+
+                <!-- 控制按鈕區 -->
+                <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto lg:min-w-[400px] justify-end pt-6 lg:pt-0 border-t lg:border-t-0 border-slate-100">
+                    <span class="w-full sm:w-auto text-center px-8 py-4 rounded-2xl text-lg font-black border-b-4 shadow-lg ${getStatusClass(item.status)}">
                         ${item.status || '🚀 正在起飛'}
                     </span>
-                    <div class="flex flex-wrap gap-2 justify-center text-nowrap">
-                        <button onclick="toggleStatus('${item.id}')" title="切換進度" class="p-5 bg-white text-slate-400 rounded-2xl border-2 border-slate-100 btn-game text-nowrap"><i class="fas fa-sync-alt text-2xl"></i></button>
-                        <button onclick="updateProjectLink('${item.id}')" title="連結管理" class="p-5 bg-white text-purple-600 rounded-2xl border-2 border-slate-100 btn-game text-nowrap"><i class="fas fa-link text-2xl text-nowrap text-nowrap"></i></button>
+                    <div class="flex flex-wrap gap-2 justify-center">
+                        <button onclick="toggleStatus('${item.id}')" class="p-5 bg-white text-slate-400 rounded-2xl border-2 border-slate-100 btn-game"><i class="fas fa-sync-alt text-2xl"></i></button>
+                        <button onclick="updateProjectLink('${item.id}')" class="p-5 bg-white text-purple-600 rounded-2xl border-2 border-slate-100 btn-game"><i class="fas fa-link text-2xl"></i></button>
                         ${isCompleted ? `<button onclick="openRatingModal('${item.id}', '${item.topic}')" class="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-2xl font-black text-xl btn-game pulse-soft">奧援 ⚡</button>` : ''}
-                        <button onclick="deleteProject('${item.id}')" class="p-5 bg-white text-slate-200 hover:text-red-500 rounded-2xl border-2 border-slate-100 btn-game text-nowrap"><i class="far fa-trash-alt text-2xl"></i></button>
+                        <button onclick="deleteProject('${item.id}')" class="p-5 bg-white text-slate-200 hover:text-red-500 rounded-2xl border-2 border-slate-100 btn-game"><i class="far fa-trash-alt text-2xl"></i></button>
                     </div>
+                </div>
+            </div>
+
+            <!-- ✅ 管理員解鎖：詳細個人分數明細 -->
+            <div class="${isAdminView ? 'block' : 'hidden'} mt-10 pt-10 border-t-4 border-dashed border-slate-100 animate-in fade-in">
+                <p class="w-full text-lg font-black text-slate-400 uppercase tracking-[0.4em] mb-6">奧援明細 (管理員解鎖)</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${vCount > 0 ? voters.map(v => `
+                        <div class="bg-white p-6 rounded-[2rem] border-4 border-slate-50 shadow-sm flex flex-col gap-3">
+                            <div class="flex justify-between items-center border-b-2 border-slate-50 pb-3">
+                                <span class="text-purple-600 text-2xl font-black italic">@${v}</span>
+                                <span class="text-slate-300 text-xs font-mono">${votesObj[v].time || ''}</span>
+                            </div>
+                            <div class="flex gap-4 text-lg font-black text-slate-400 italic">
+                                <span class="bg-purple-50 px-3 py-1 rounded-xl">L: ${votesObj[v].logic}</span>
+                                <span class="bg-emerald-50 px-3 py-1 rounded-xl">U: ${votesObj[v].utility}</span>
+                                <span class="bg-orange-50 px-3 py-1 rounded-xl">I: ${votesObj[v].innovation}</span>
+                            </div>
+                        </div>
+                    `).join('') : '<p class="text-slate-400 italic text-2xl px-4">尚無評分細節。</p>'}
                 </div>
             </div>
         </div>`;
