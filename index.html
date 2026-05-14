@@ -573,33 +573,49 @@ function analyzeVotingBehavior(data) {
 
 function calcEngagementScore(data) {
     const stats = {};
+    const CONFIDENCE_THRESHOLD = 3; // 設定信心閾值：收到 3 票以上才不扣分
+
     data.forEach(item => {
         const n = item.name;
-        if (!stats[n]) stats[n] = { total: 0, done: 0, votesGiven: 0, qSum: 0, qCount: 0 };
+        if (!stats[n]) stats[n] = { total: 0, done: 0, votesGiven: 0, qSum: 0, qCount: 0, votesReceivedCount: 0 };
+        
         stats[n].total++;
-        if ((item.status||'').includes('達成') || (item.status||'').includes('完成')) stats[n].done++;
-        Object.values(item.votes||{}).forEach(v => {
+        if ((item.status || '').includes('達成') || (item.status || '').includes('完成')) stats[n].done++;
+        
+        const votes = Object.values(item.votes || {});
+        votes.forEach(v => {
             stats[n].qSum += (+v.logic + +v.utility + +v.innovation);
             stats[n].qCount += 3;
+            stats[n].votesReceivedCount++; // 紀錄實際收到的投票人數
         });
     });
+
     data.forEach(item => {
-        Object.keys(item.votes||{}).forEach(voter => {
+        Object.keys(item.votes || {}).forEach(voter => {
             if (stats[voter]) stats[voter].votesGiven++;
         });
     });
+
     const maxVotes = Math.max(...Object.values(stats).map(s => s.votesGiven), 1);
+
     return Object.entries(stats).map(([name, s]) => {
-        const completion   = s.total > 0 ? s.done / s.total : 0;
+        const completion = s.total > 0 ? s.done / s.total : 0;
         const contribution = s.votesGiven / maxVotes;
-        const quality      = s.qCount > 0 ? (s.qSum / s.qCount) / 5 : 0;
+        
+        // --- 核心逻辑修改：加入信心加權 ---
+        const rawQuality = s.qCount > 0 ? (s.qSum / s.qCount) / 5 : 0;
+        // 信心係數：如果收票少於門檻，會按比例打折 (例如只有 1 票則信心為 1/3)
+        const confidence = s.votesReceivedCount >= CONFIDENCE_THRESHOLD ? 1 : (s.votesReceivedCount / CONFIDENCE_THRESHOLD);
+        const quality = rawQuality * confidence;
+        
         const score = Math.round((completion * 0.4 + contribution * 0.3 + quality * 0.3) * 100);
         const grade = score >= 80 ? 'S' : score >= 65 ? 'A' : score >= 50 ? 'B' : score >= 35 ? 'C' : 'D';
+
         return {
             name, score, grade,
-            completionPct:   Math.round(completion * 100),
+            completionPct: Math.round(completion * 100),
             contributionPct: Math.round(contribution * 100),
-            qualityPct:      Math.round(quality * 100),
+            qualityPct: Math.round(quality * 100), // 這邊會反映出加權後的結果
             done: s.done, total: s.total, votesGiven: s.votesGiven
         };
     }).sort((a, b) => b.score - a.score);
