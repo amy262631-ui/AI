@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        html { scroll-behavior: smooth; }
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&display=swap');                
         :root {
             --game-pink: #ff4d91;
@@ -249,6 +250,9 @@
         <header class="text-center mb-10 md:mb-16">
             <h1 class="text-4xl md:text-7xl font-black text-slate-900 mb-6 italic uppercase tracking-tighter text-nowrap text-balance">AI <span class="text-purple-600">Innovation</span> Quest</h1>
             <p class="text-slate-500 text-lg md:text-2xl font-bold">這不是工作，這是一場進化的冒險 ✨</p>
+            <a href="#leaderboard" class="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-white text-purple-600 font-black text-sm rounded-full border-2 border-purple-200 shadow-md hover:bg-purple-600 hover:text-white transition-all duration-200">
+    <i class="fas fa-crown text-yellow-400"></i> 跳到戰力榜 <i class="fas fa-chevron-down"></i>
+</a>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
@@ -366,7 +370,7 @@
                 </div>
 
                 <!-- 戰力榜 -->
-                <div class="pt-12 border-t-4 border-slate-200">
+                <div id="leaderboard" class="pt-12 border-t-4 border-slate-200">
                     <h2 class="text-3xl md:text-5xl font-black text-slate-900 mb-12 italic flex items-center text-nowrap">
                         <i class="fas fa-crown mr-4 text-yellow-400"></i> 夥伴探險戰力榜
                     </h2>
