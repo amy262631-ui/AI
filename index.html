@@ -393,11 +393,14 @@
     <!-- 評分彈窗 -->
     <div id="ratingModal" class="fixed inset-0 bg-purple-900/80 hidden flex items-center justify-center z-50 p-4 backdrop-blur-xl">
         <div class="bg-white rounded-[3rem] p-8 md:p-12 max-w-2xl w-full shadow-2xl border-8 border-white overflow-y-auto max-h-[90vh]">
-            <div class="text-center mb-8">
-                <div class="text-6xl mb-4 pulse-soft text-nowrap">✨</div>
-                <h3 class="text-3xl md:text-5xl font-black text-slate-900 mb-2">傳送奧援能量</h3>
-                <p id="ratingProjectName" class="text-purple-600 font-black text-xl md:text-2xl italic text-wrap"></p>
-            </div>
+            <div class="relative">
+    <button onclick="closeRatingModal()" class="absolute -top-4 -right-4 w-10 h-10 bg-slate-100 hover:bg-red-500 hover:text-white text-slate-400 rounded-full font-black text-lg flex items-center justify-center transition-all duration-200 shadow-md">✕</button>
+</div>
+<div class="text-center mb-8">
+    <div class="text-6xl mb-4 pulse-soft text-nowrap">✨</div>
+    <h3 class="text-3xl md:text-5xl font-black text-slate-900 mb-2">傳送奧援能量</h3>
+    <p id="ratingProjectName" class="text-purple-600 font-black text-xl md:text-2xl italic text-wrap"></p>
+</div>
             <div class="space-y-8">
                 <input type="text" id="voterName" placeholder="您的英雄稱號" class="w-full bg-slate-50 border-4 border-slate-100 rounded-[1.5rem] px-8 py-4 font-black text-2xl text-center shadow-inner text-nowrap">
                 <p class="text-center text-sm font-black text-slate-400 -mt-4">⚠️ 請填寫您的本名，系統將對應您的身份紀錄</p>
